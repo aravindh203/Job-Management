@@ -26,7 +26,7 @@ export default class JobManagementWebPart extends BaseClientSideWebPart<IJobMana
 
     return super.onInit();
   }
-l
+
   public render(): void {
     const element: React.ReactElement<IJobManagementProps> = React.createElement(
       JobManagement,
