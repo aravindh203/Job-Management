@@ -1,0 +1,16 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.14.0",
+    "libraryName": "job-management",
+    "libraryId": "3c97e7e9-ba87-46d3-b383-8d6122839bcd",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "job-management",
+    "solutionShortDescription": "job-management description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
