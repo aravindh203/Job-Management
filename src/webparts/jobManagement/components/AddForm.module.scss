@@ -1,0 +1,11 @@
+.btnAlign {
+    display: flex;
+    justify-content: space-between;
+    .newButton {
+        background-color: #8f3cde;
+        padding: 10px 15px;
+        color: 'white';
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+}
