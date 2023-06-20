@@ -1,4 +1,5 @@
 import * as React from 'react';
+<<<<<<< Arun
 import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
@@ -201,7 +202,4 @@ const MainCoimponent=(props:any):JSX.Element=>{
             <div>
                 <DetailsList items={filterData} columns={col} selectionMode={SelectionMode.none}/>
             </div>
-        </div>
-    )
-}
 export default MainCoimponent
