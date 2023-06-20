@@ -1,10 +1,10 @@
 import * as React from 'react';
+import ProviderAddForm from './Provider/providerFrom';
+
 const MainCoimponent=(props:any)=>{
-    console.log('props',props.context);
-    
     return(
         <div>
-            Main
+            <ProviderAddForm/>
         </div>
     )
 }
