@@ -2,30 +2,46 @@
     width: 100%;
     display: flex;
     justify-content: center;
-}
-
-.formContainer {
-    padding: 10px 30px;
-    width: 60%;
-    .inputAlign {
-        width: 100%;
-        display: flex;
-        gap: 30px;
-        padding: 20px 0;
-        div {
-            width: 100%;
+    .formContainer {
+        width: 60%;
+        border: 1px solid gray;
+        border-radius: 7px;
+        .cancelBox {
+            display: flex;
+            background-color: blueviolet;
+            padding: 5px;
+            justify-content: flex-end;
+            border-radius: 7px 7px 0 0;
+            .cancelButton {
+                color: white;
+            }
+            .cancelButton:hover {
+                background-color: blueviolet;
+            }
         }
-    }
-    input {
-        background-color: #8fbc8f3d;
-    }
-    textArea {
-        background-color: #8fbc8f3d;
-        padding: 10px 10px;
-    }
-    .formBtn {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
+        .formContent {
+            padding: 10px 30px;
+            .inputAlign {
+                width: 100%;
+                display: flex;
+                gap: 30px;
+                padding: 20px 0;
+                div {
+                    width: 100%;
+                }
+            }
+            input {
+                background-color: #8fbc8f3d;
+            }
+            textArea {
+                background-color: #8fbc8f3d;
+                padding: 10px 10px;
+            }
+            .formBtn {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+            }
+        }
     }
 }
