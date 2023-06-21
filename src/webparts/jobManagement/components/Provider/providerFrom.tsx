@@ -16,7 +16,7 @@ interface IProviderAdd{
     NokPhoneNo:number;
 }
 
-const ProviderAddForm = ():JSX.Element =>{
+const ProviderAddForm = (props):JSX.Element =>{
     const text={
         root:{
             ".ms-TextField-wrapper":{
