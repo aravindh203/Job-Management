@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState,useEffect } from 'react';
 import { TextField } from '@fluentui/react/lib/TextField';
-import { Checkbox, DefaultButton } from '@fluentui/react';
+import { Checkbox, DefaultButton, IconButton } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
 import styles from './providerForm.module.scss';
 
@@ -109,8 +109,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
     const handleSubmit = async (btnVal:string) =>{
         
         var submitAuthetication = validation(btnVal);
-        console.log('submitAuthetication',submitAuthetication);
-        
+       
         let newJson={
             ProviderName:data.Name,
             PhoneNo:data.PhoneNo,
@@ -127,54 +126,58 @@ const ProviderAddForm = (props:any):JSX.Element =>{
                 props.setChange({...props.change,provider:false})
             })
             .catch(error=>console.log('add error',error))
-            
         }
     }
 
     return(
-        <div className={''}>
+        <div className={styles.contain}>
             <div className={styles.formContainer}>
-                <div className={styles.inputAlign}>
-                    <div>
-                        <TextField value={data.Name} label='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} disabled={false}/>
-                    </div>
-                    <div>
-                        <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} label='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} disabled={false}/>
-                    </div>
+                <div className={styles.cancelBox}>
+                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,provider:false})}}/>
                 </div>
-                <div>
-                    <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} disabled={false}/>
-                </div>
-                <div className={styles.inputAlign}>
-                    <div>
-                        <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={false}/>
-                    </div>
-                    <div>
-                        <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={false}/>
-                    </div>
-                </div>
-                <div>
-                    <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)} disabled={false}/>
-                </div>
-                {
-                    data.Nok ? 
-                    (<div className={styles.inputAlign}>
+                <div className={styles.formContent}>
+                    <div className={styles.inputAlign}>
                         <div>
-                            <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                            <TextField value={data.Name} label='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} disabled={false}/>
                         </div>
                         <div>
-                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                            <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} label='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} disabled={false}/>
                         </div>
                     </div>
-                    )
-                    :
-                    null
-                }
-                <div>
-                    <p style={{textAlign:'center',color:'red'}}>{error}</p>
-                    <div className={styles.formBtn}>
-                        <DefaultButton text='Add' onClick={()=>handleSubmit('Add')}/>
-                        <DefaultButton text='Draft' onClick={()=>handleSubmit('Draft')}/>
+                    <div>
+                        <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                    </div>
+                    <div className={styles.inputAlign}>
+                        <div>
+                            <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                        </div>
+                        <div>
+                            <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                        </div>
+                    </div>
+                    <div>
+                        <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                    </div>
+                    {
+                        data.Nok ? 
+                        (<div className={styles.inputAlign}>
+                            <div>
+                                <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                            </div>
+                            <div>
+                                <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                            </div>
+                        </div>
+                        )
+                        :
+                        null
+                    }
+                    <div>
+                        <p style={{textAlign:'center',color:'red'}}>{error}</p>
+                        <div className={styles.formBtn}>
+                            <DefaultButton text='Add' onClick={()=>handleSubmit('Add')}/>
+                            <DefaultButton text='Draft' onClick={()=>handleSubmit('Draft')}/>
+                        </div>
                     </div>
                 </div>
             </div>
