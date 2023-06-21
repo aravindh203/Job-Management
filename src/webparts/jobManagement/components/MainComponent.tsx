@@ -22,7 +22,7 @@ const MainCoimponent=(props:any)=>{
             }  
 
             {
-                componentChange.provider ? <ProviderForm change={componentChange} setChange={setComponentChange} formView={formView}/>:null
+                componentChange.provider ? <ProviderForm change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null
             }      
         </>
      )
