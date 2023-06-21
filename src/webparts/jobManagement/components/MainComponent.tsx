@@ -3,19 +3,27 @@ import { useState,useEffect } from 'react';
 import DashBoardComponent from './DashBoardComponent';
 import ProviderForm from './Provider/providerFrom';
 import ProviderEditForm from './Provider/ProviderEditForm';
+interface IComponentChange{
+    provider:boolean;
+    ProviderEdit:boolean;
+    clinet:boolean;
+    contructor:boolean;
+}
+interface IFormView{
+    authentication:boolean;
+    Id:number;
+    status:string;
+}
 const MainCoimponent=(props:any)=>{
 
     const [dbAuthentication,setDbAuthentication] = useState<boolean>(true)
-    const [componentChange,setComponentChange]=React.useState({
+    const [componentChange,setComponentChange]=React.useState<IComponentChange>({
         provider:false,
         ProviderEdit:false,
         clinet:false,
         contructor:false
     })
-
-    console.log('componentChange',componentChange);
-        
-    const [formView,setFormView]=React.useState({
+    const [formView,setFormView]=React.useState<IFormView>({
         authentication:false,
         Id:null,
         status:''
@@ -27,8 +35,8 @@ const MainCoimponent=(props:any)=>{
             dashboard.push(componentChange[key])
         } 
 
-        var dbauthendic = dashboard.every(value=>value===false);
-        setDbAuthentication(dbauthendic)
+        var dbauthentic = dashboard.every(value=>value===false);
+        setDbAuthentication(dbauthentic)
         
     },[componentChange])
     return(

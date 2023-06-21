@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption } from '@fluentui/react';
+import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption, Icon } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
 interface IData{
@@ -16,8 +16,29 @@ interface IData{
 const DashBoardComponent=(props:any):JSX.Element=>{    
     const addIcon={
         root:{
-            ".ms-Icon":{
-                color:'white'
+            ".ms-Button-icon":{
+                color:'#fff !important',
+            },
+            ":hover":{
+                ".ms-Button-icon":{
+                    color:'#fff !important',
+                },
+            }
+        },
+    }
+    const list={
+        root:{
+            ".ms-DetailsHeader":{
+                backgroundColor:'#8f3cde',
+                padding:"0px"
+            },
+            ".ms-DetailsHeader-cell":{
+                ":hover":{
+                    backgroundColor:'#8f3cde',
+                }
+            },
+            ".ms-DetailsHeader-cellTitle":{
+                color:"#fff"
             }
         }
     }
@@ -98,12 +119,11 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewHandle(item)}}/>)
     }]
 
-    const [pageRender,setPageRender]=React.useState('Provider')
+    const [pageRender,setPageRender]=React.useState<string>('Provider')
     const [MData,setMData]=React.useState<IData[]>([])
-    const [filter,setFilter]=React.useState('All')
+    const [filter,setFilter]=React.useState<string>('All')
     const [filterData,setFilterData]=React.useState<IData[]>([])
-    
-    
+     
     const getData=async()=>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').get().then((data)=>{
             
@@ -129,7 +149,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
     const dropFilter=()=>{
         
-        var filterData1 = [...MData].filter(value=>{
+        var filterData1:IData[] = [...MData].filter(value=>{
             if(filter==="Draft"){
                 return value.Status==='Draft'
             }
@@ -151,14 +171,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             props.setChange({...props.change,provider:true})
         }
     }
-    const editHandle=(item:any)=>{
+    const editHandle=(item:IData)=>{
         props.setFormView({authentication:true,Id:item.Id,status:'edit'})
 
         if(pageRender==='Provider'){
             props.setChange({...props.change,ProviderEdit:true})
         }
     }
-    const viewHandle=(item:any)=>{
+    const viewHandle=(item:IData)=>{
         props.setFormView({authentication:true,Id:item.Id,status:'view'})
 
         if(pageRender==='Provider'){
@@ -179,41 +199,43 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     
     return(
         <div>
+            <div>
+                <Pivot aria-label="Basic Pivot Example">
+                    <PivotItem headerText="Provider" 
+                        onRenderItemLink={(item)=>{
+                            return <div onClick={()=>{
+                                setPageRender(item.headerText)
+                            }}>Provider</div>
+                        }}/>
+                    <PivotItem headerText="Client" onRenderItemLink={(item)=>{
+                            return <div onClick={()=>{
+                                setPageRender(item.headerText)
+                            }}>Client</div>
+                        }}/>
+                    <PivotItem headerText="Contructor" onRenderItemLink={(item)=>{
+                            return <div onClick={()=>{
+                                setPageRender(item.headerText)
+                            }}>Contructor</div>
+                        }}/>
+                </Pivot>
+            </div>            
             <div className={styles.btnAlign}>
-                <div>
-                    <Pivot aria-label="Basic Pivot Example">
-                        <PivotItem headerText="Provider" 
-                            onRenderItemLink={(item)=>{
-                                return <div onClick={()=>{
-                                    setPageRender(item.headerText)
-                                }}>Provider</div>
-                            }}/>
-                        <PivotItem headerText="Client" onRenderItemLink={(item)=>{
-                                return <div onClick={()=>{
-                                    setPageRender(item.headerText)
-                                }}>Client</div>
-                            }}/>
-                        <PivotItem headerText="Contructor" onRenderItemLink={(item)=>{
-                                return <div onClick={()=>{
-                                    setPageRender(item.headerText)
-                                }}>Contructor</div>
-                            }}/>
-                    </Pivot>
+                <div className={styles.dropContain}>
+                    <div className={styles.dropDown}>
+                        <Dropdown
+                            label="Status"
+                            options={option}
+                            selectedKey={filter}
+                            onChange={(e,item)=>setFilter(item.text)}
+                        />
+                    </div>
                 </div>
                 <div>
                     <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />
                 </div>
             </div>
             <div>
-            <Dropdown
-                label="Status"
-                options={option}
-                selectedKey={filter}
-                onChange={(e,item)=>setFilter(item.text)}
-            />
-            </div>
-            <div>
-                <DetailsList items={filterData} columns={col} selectionMode={SelectionMode.none}/>
+                <DetailsList items={filterData} columns={col} selectionMode={SelectionMode.none} styles={list}/>
             </div>
         </div>)}
             
