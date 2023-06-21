@@ -7,17 +7,22 @@ const MainCoimponent=(props:any)=>{
         clinet:false,
         contructor:false
     })
-    
+    const [formView,setFormView]=React.useState({
+        authentication:false,
+        Id:null,
+        status:''
+    })
+   
     return(
         <>
             {!componentChange.provider && !componentChange.clinet && !componentChange.contructor ?
-                <DashBoardComponent change={componentChange} setChange={setComponentChange}/>
+                <DashBoardComponent change={componentChange} setChange={setComponentChange} setFormView={setFormView}/>
                 :
                 null
             }  
 
             {
-                componentChange.provider ? <ProviderForm change={componentChange} setChange={setComponentChange}/>:null
+                componentChange.provider ? <ProviderForm change={componentChange} setChange={setComponentChange} formView={formView}/>:null
             }      
         </>
      )
