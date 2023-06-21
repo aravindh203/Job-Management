@@ -8,15 +8,17 @@
         border-radius: 7px;
         .cancelBox {
             display: flex;
-            background-color: blueviolet;
-            padding: 5px;
-            justify-content: flex-end;
+            background-color: #8f3cde;
+            padding: 0px 20px;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
             border-radius: 7px 7px 0 0;
             .cancelButton {
                 color: white;
             }
             .cancelButton:hover {
-                background-color: blueviolet;
+                background-color: #8f3cde;
             }
         }
         .formContent {
@@ -36,6 +38,7 @@
             textArea {
                 background-color: #8fbc8f3d;
                 padding: 10px 10px;
+                resize: none;
             }
             .formBtn {
                 display: flex;

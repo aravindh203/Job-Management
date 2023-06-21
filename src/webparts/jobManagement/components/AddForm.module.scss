@@ -1,6 +1,15 @@
 .btnAlign {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin: 10px 5px;
+    .dropContain {
+        width: 100%;
+        display: flex;
+        .dropDown {
+            width: 15%;
+        }
+    }
     .newButton {
         background-color: #8f3cde;
         padding: 10px 15px;

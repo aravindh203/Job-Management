@@ -133,6 +133,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
         <div className={styles.contain}>
             <div className={styles.formContainer}>
                 <div className={styles.cancelBox}>
+                    <h3>Provider Add Form</h3>
                     <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,provider:false})}}/>
                 </div>
                 <div className={styles.formContent}>
@@ -156,7 +157,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
                         </div>
                     </div>
                     <div>
-                        <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                        <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)} disabled={false} />
                     </div>
                     {
                         data.Nok ? 
