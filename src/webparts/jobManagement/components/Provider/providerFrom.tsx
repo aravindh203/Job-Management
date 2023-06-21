@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { TextField } from '@fluentui/react/lib/TextField';
 import { Checkbox, DefaultButton } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
@@ -36,7 +36,7 @@ const ProviderAddForm = (props):JSX.Element =>{
         NokPhoneNo:null,
     })
 
-    const handleInputValue = (event:any) =>{
+    const handleInputValue = (event:any):void =>{
         if(event.target.name==='Provider Name'){
             setData({...data,Name:event.target.value})
         }
@@ -63,7 +63,7 @@ const ProviderAddForm = (props):JSX.Element =>{
         }
     }
 
-    const validation = (btnVal:string) =>{
+    const validation = (btnVal:string):boolean =>{
         
         let isAllValueFilled=true;
         let emailvalidation=/^([A-Za-z0-9_.])+\@([g][m][a][i][l])+\.([c][o][m])+$/;
@@ -85,13 +85,19 @@ const ProviderAddForm = (props):JSX.Element =>{
             setError('please enter a address')
             isAllValueFilled = false;
         }
-        else if((addBtn && !data.NokName) && true){
-            setError('please enter a Nok Name')
-            isAllValueFilled = false;
-        }
-        else if((addBtn && !(data.NokPhoneNo && data.NokPhoneNo.toString().length==10)) || (data.NokPhoneNo && data.NokPhoneNo.toString().length!==10)){
-            setError('please enter a Nok Name')
-            isAllValueFilled = false;
+        else if(data.Nok){
+            if((addBtn && !data.NokName) && true){
+                setError('please enter a Nok Name')
+                isAllValueFilled = false;
+            }
+            else if((addBtn && !(data.NokPhoneNo && data.NokPhoneNo.toString().length==10)) || (data.NokPhoneNo && data.NokPhoneNo.toString().length!==10)){
+                setError('please enter Nok mobile number')
+                isAllValueFilled = false;
+            }
+            else{
+                setError('')
+                isAllValueFilled = true;
+            }
         }
         else{
             setError('')
@@ -117,41 +123,50 @@ const ProviderAddForm = (props):JSX.Element =>{
         }
         if(submitAuthetication){
             await sp.web.lists.getByTitle('ProviderList').items.add(newJson)
-            .then((data)=>alert('data added sucessfully')).catch(error=>console.log('add error',error))
+            .then((data)=>{
+                props.setChange({...props.change,provider:false})
+            })
+            .catch(error=>console.log('add error',error))
+            
         }
     }
+
+    useEffect(()=>{
+
+    },[])
+
     return(
         <div className={styles.formContainer}>
             <div className={styles.inputAlign}>
                 <div>
-                    <TextField value={data.Name} placeholder='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} underlined/>
+                    <TextField value={data.Name} placeholder='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
                 </div>
                 <div>
-                    <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} placeholder='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} underlined/>
+                    <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} placeholder='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
                 </div>
             </div>
             <div>
-                <TextField value={data.Email} placeholder='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} underlined/>
+                <TextField value={data.Email} placeholder='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
             </div>
             <div className={styles.inputAlign}>
                 <div>
-                    <TextField value={data.FirstAddress} placeholder='Contact Address' name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} underlined/>
+                    <TextField value={data.FirstAddress} placeholder='Contact Address' name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
                 </div>
                 <div>
-                    <TextField value={data.SecondAddress} placeholder='Second Address' name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} underlined/>
+                    <TextField value={data.SecondAddress} placeholder='Second Address' name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
                 </div>
             </div>
             <div>
-                <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)}/>
+                <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)} disabled={false}/>
             </div>
             {
                 data.Nok ? 
                 (<div className={styles.inputAlign}>
                     <div>
-                        <TextField value={data.NokName} placeholder='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} underlined/>
+                        <TextField value={data.NokName} placeholder='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
                     </div>
                     <div>
-                        <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} placeholder='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} underlined/>
+                        <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} placeholder='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
                     </div>
                 </div>
                 )
