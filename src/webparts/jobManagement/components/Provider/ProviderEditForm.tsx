@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState,useEffect } from 'react';
 import { TextField } from '@fluentui/react/lib/TextField';
-import { Checkbox, DefaultButton } from '@fluentui/react';
+import { Checkbox, DefaultButton, IconButton } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
 import styles from './providerForm.module.scss';
 
@@ -156,45 +156,49 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     },[props.formView.authentication])
 
     return(
-        <div className={''}>
+        <div className={styles.contain}>
             <div className={styles.formContainer}>
-                <div className={styles.inputAlign}>
-                    <div>
+                <div className={styles.cancelBox}>
+                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,ProviderEdit:false})}}/>
+                </div>
+                <div className={styles.formContent}>
+                    <div className={styles.inputAlign}>
+                        <div>
                         <TextField value={data.Name} label='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
-                    </div>
-                    <div>
+                        </div>
+                        <div>
                         <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} label='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                        </div>
                     </div>
-                </div>
-                <div>
+                    <div>
                     <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
-                </div>
-                <div className={styles.inputAlign}>
-                    <div>
+                    </div>
+                    <div className={styles.inputAlign}>
+                        <div>
                         <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                        </div>
+                        <div>
+                            <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                        </div>
+                    </div>
+                    <div className={styles.inputAlign}>
+                        <div>
+                            <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                        </div>
+                        <div>
+                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                        </div>
                     </div>
                     <div>
-                        <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
-                    </div>
-                </div>
-
-                <div className={styles.inputAlign}>
-                    <div>
-                        <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
-                    </div>
-                    <div>
-                        <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
-                    </div>
-                </div>
-                <div>
-                    <p style={{textAlign:'center',color:'red'}}>{error}</p>
-                    <div className={styles.formBtn}>
+                        <p style={{textAlign:'center',color:'red'}}>{error}</p>
+                        <div className={styles.formBtn}>
                         {
-                            props.formView.status!=='view' ?
+                        props.formView.status!=='view' ?
                             <DefaultButton text='Update' onClick={()=>handleUpdate('Add')}/>
-                            :
+                        :
                             null
                         }
+                        </div>
                     </div>
                 </div>
             </div>
