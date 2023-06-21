@@ -153,11 +153,17 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
     const editHandle=(item:any)=>{
         props.setFormView({authentication:true,Id:item.Id,status:'edit'})
-        handlePageChange()
+
+        if(pageRender==='Provider'){
+            props.setChange({...props.change,ProviderEdit:true})
+        }
     }
     const viewHandle=(item:any)=>{
         props.setFormView({authentication:true,Id:item.Id,status:'view'})
-        handlePageChange()
+
+        if(pageRender==='Provider'){
+            props.setChange({...props.change,ProviderEdit:true})
+        }
     }
     const errorFunction=(error:any,name:string)=>{
         console.log("error",error,name);
