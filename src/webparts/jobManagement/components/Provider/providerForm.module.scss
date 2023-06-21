@@ -1,24 +1,29 @@
-.formContainer{
+.contain {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.formContainer {
     padding: 10px 30px;
-    // background-color: blueviolet;
-    .inputAlign{
+    width: 60%;
+    .inputAlign {
         width: 100%;
         display: flex;
         gap: 30px;
-        padding: 30px 0;
-        div{
+        padding: 20px 0;
+        div {
             width: 100%;
         }
     }
-    input{
+    input {
         background-color: #8fbc8f3d;
-        padding: 22px 10px;    
     }
-    textArea{
-        background-color: #8fbc8f3d;    
+    textArea {
+        background-color: #8fbc8f3d;
         padding: 10px 10px;
     }
-    .formBtn{
+    .formBtn {
         display: flex;
         justify-content: center;
         gap: 10px;
