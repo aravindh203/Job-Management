@@ -16,7 +16,7 @@ interface IProviderAdd{
     NokPhoneNo:number;
 }
 
-const ProviderAddForm = (props):JSX.Element =>{
+const ProviderAddForm = (props:any):JSX.Element =>{
     const text={
         root:{
             ".ms-TextField-wrapper":{
@@ -130,10 +130,6 @@ const ProviderAddForm = (props):JSX.Element =>{
             
         }
     }
-
-    useEffect(()=>{
-
-    },[])
 
     return(
         <div className={styles.formContainer}>
