@@ -89,14 +89,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         name:'Edit',
         minWidth:100,
         maxWidth:150,
-        onRender:(item)=>(<IconButton iconProps={{ iconName: 'edit' }} title="Edit" ariaLabel="Edit" onClick={()=>{props.setFormView({authentication:true,Id:item.Id,status:'edit'})}}/>)
+        onRender:(item)=>(<IconButton iconProps={{ iconName: 'edit' }} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>)
     },{
         key:'10',
         fieldName:'View',
         name:'View',
         minWidth:100,
         maxWidth:150,
-        onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{props.setFormView({authentication:true,Id:item.Id,status:'view'})}}/>)
+        onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewHandle(item)}}/>)
     }]
 
     const [pageRender,setPageRender]=React.useState('Provider')
@@ -147,16 +147,21 @@ const DashBoardComponent=(props:any):JSX.Element=>{
          
         setFilterData([...filterData1])
     }
-
-    const errorFunction=(error:any,name:string)=>{
-        console.log("error",error,name);
-    }
-
-    const handlePageChnage = () =>{
+    const handlePageChange = () =>{
         if(pageRender==='Provider'){
             props.setChange({...props.change,provider:true})
         }
-        
+    }
+    const editHandle=(item:any)=>{
+        props.setFormView({authentication:true,Id:item.Id,status:'edit'})
+        handlePageChange()
+    }
+    const viewHandle=(item:any)=>{
+        props.setFormView({authentication:true,Id:item.Id,status:'view'})
+        handlePageChange()
+    }
+    const errorFunction=(error:any,name:string)=>{
+        console.log("error",error,name);
     }
 
     React.useEffect(()=>{
@@ -191,7 +196,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     </Pivot>
                 </div>
                 <div>
-                    <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChnage()} />
+                    <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />
                 </div>
             </div>
             <div>
