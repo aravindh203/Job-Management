@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { TextField } from '@fluentui/react/lib/TextField';
 import { Checkbox, DefaultButton } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
-import styles from './ProviderForm.module.scss'
+import styles from './providerForm.module.scss';
+
 interface IProviderAdd{
     Name:string;
     PhoneNo:number;
