@@ -3,7 +3,7 @@ import DashBoardComponent from './DashBoardComponent';
 import ProviderForm from './Provider/providerFrom';
 const MainCoimponent=(props:any)=>{
     const [componentChange,setComponentChange]=React.useState({
-        provider:false,
+        provider:true,
         clinet:false,
         contructor:false
     })

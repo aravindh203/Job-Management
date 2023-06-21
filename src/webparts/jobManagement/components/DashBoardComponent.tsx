@@ -2,7 +2,6 @@ import * as React from 'react';
 import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
-
 interface IData{
     Id:number;
     ProviderName:string;

@@ -19,8 +19,8 @@ interface IProviderAdd{
 const ProviderAddForm = (props:any):JSX.Element =>{
     const text={
         root:{
-            ".ms-TextField-wrapper":{
-                padding:'10px 0px'
+            ".ms-TextField-fieldGroup":{
+                border:'none'
             }
         }
     }
@@ -132,48 +132,50 @@ const ProviderAddForm = (props:any):JSX.Element =>{
     }
 
     return(
-        <div className={styles.formContainer}>
-            <div className={styles.inputAlign}>
-                <div>
-                    <TextField value={data.Name} placeholder='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
-                </div>
-                <div>
-                    <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} placeholder='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
-                </div>
-            </div>
-            <div>
-                <TextField value={data.Email} placeholder='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
-            </div>
-            <div className={styles.inputAlign}>
-                <div>
-                    <TextField value={data.FirstAddress} placeholder='Contact Address' name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
-                </div>
-                <div>
-                    <TextField value={data.SecondAddress} placeholder='Second Address' name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
-                </div>
-            </div>
-            <div>
-                <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)} disabled={false}/>
-            </div>
-            {
-                data.Nok ? 
-                (<div className={styles.inputAlign}>
+        <div className={''}>
+            <div className={styles.formContainer}>
+                <div className={styles.inputAlign}>
                     <div>
-                        <TextField value={data.NokName} placeholder='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
+                        <TextField value={data.Name} label='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} disabled={false}/>
                     </div>
                     <div>
-                        <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} placeholder='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} underlined disabled={false}/>
+                        <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} label='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} disabled={false}/>
                     </div>
                 </div>
-                )
-                :
-                null
-            }
-            <div>
-                <p style={{textAlign:'center',color:'red'}}>{error}</p>
-                <div className={styles.formBtn}>
-                    <DefaultButton text='Add' onClick={()=>handleSubmit('Add')}/>
-                    <DefaultButton text='Draft' onClick={()=>handleSubmit('Draft')}/>
+                <div>
+                    <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                </div>
+                <div className={styles.inputAlign}>
+                    <div>
+                        <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                    </div>
+                    <div>
+                        <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                    </div>
+                </div>
+                <div>
+                    <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                </div>
+                {
+                    data.Nok ? 
+                    (<div className={styles.inputAlign}>
+                        <div>
+                            <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                        </div>
+                        <div>
+                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                        </div>
+                    </div>
+                    )
+                    :
+                    null
+                }
+                <div>
+                    <p style={{textAlign:'center',color:'red'}}>{error}</p>
+                    <div className={styles.formBtn}>
+                        <DefaultButton text='Add' onClick={()=>handleSubmit('Add')}/>
+                        <DefaultButton text='Draft' onClick={()=>handleSubmit('Draft')}/>
+                    </div>
                 </div>
             </div>
         </div>
