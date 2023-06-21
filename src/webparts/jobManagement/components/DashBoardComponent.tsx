@@ -89,24 +89,21 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         name:'Edit',
         minWidth:100,
         maxWidth:150,
-        onRender:(item)=>(<IconButton iconProps={{ iconName: 'edit' }} title="Edit" ariaLabel="Edit" onClick={()=>{setEdit({editAuthentication:true,editId:item.Id})}}/>)
+        onRender:(item)=>(<IconButton iconProps={{ iconName: 'edit' }} title="Edit" ariaLabel="Edit" onClick={()=>{props.setFormView({authentication:true,Id:item.Id,status:'edit'})}}/>)
     },{
         key:'10',
         fieldName:'View',
         name:'View',
         minWidth:100,
         maxWidth:150,
-        onRender:()=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{}}/>)
+        onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{props.setFormView({authentication:true,Id:item.Id,status:'view'})}}/>)
     }]
 
     const [pageRender,setPageRender]=React.useState('Provider')
     const [MData,setMData]=React.useState<IData[]>([])
     const [filter,setFilter]=React.useState('All')
     const [filterData,setFilterData]=React.useState<IData[]>([])
-    const [edit,setEdit]=React.useState({
-        editAuthentication:false,
-        editId:null
-    })
+    
     
     const getData=async()=>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').get().then((data)=>{
