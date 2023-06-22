@@ -113,7 +113,21 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         name:'Edit',
         minWidth:100,
         maxWidth:150,
-        onRender:(item)=>(<IconButton iconProps={{ iconName: 'edit' }} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>)
+        onRender:(item)=>{
+            var managerAuthentication = item.Status === 'Draft' ? true:false;            
+            var adminAuthentication =  item.Status === 'Pending' ? true:false;
+            console.log('adminAuthentication',adminAuthentication);
+
+            if(props.user==='Admin'){
+                return <IconButton iconProps={{ iconName: 'edit' }} disabled={adminAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
+            }
+            else if(props.user==='Manager'){
+                return <IconButton iconProps={{ iconName: 'edit' }} disabled={managerAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
+            }
+            else{
+                return <IconButton iconProps={{ iconName: 'edit' }} disabled={true} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
+            }
+        }
     },{
         key:'10',
         fieldName:'View',
@@ -174,13 +188,20 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 return value
             }
         })  
-        var searchdata=[...filterData1].filter((value)=>{
-            return value.ProviderName.toLowerCase().startsWith(search.trimStart())
-        })
+
+
+        var searchdata=[]
+        if(filterData1.length){
+            console.log('hello');
+            
+            searchdata=[...filterData1].filter((value)=>{
+                return value.ProviderName.toLowerCase().startsWith(search.trimStart())
+            })
+        }
+        console.log('searchdata',searchdata);
         setPageFilter([...searchdata])
-        // setFilterData([...filterData1]) 
-        // setPageFilter([...filterData1])  
-     
+        setFilterData([...searchdata]) 
+        
     }
     const handlePageChange = () =>{
         if(pageRender==='Provider'){
@@ -202,20 +223,16 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
     }
     const getPagination=()=>{
-        
         if(pageFilter.length>0){
-        
             let lastIndex=pagination.currentPage*pagination.displayItems
             let firstIndex=lastIndex-pagination.displayItems
             let displayData=[...pageFilter].slice(firstIndex,lastIndex)
             setFilterData(displayData)    
         }
-       
     }
     const errorFunction=(error:any,name:string)=>{
         console.log("error",error,name);
     }
-
     React.useEffect(()=>{
         dropFilter()
     },[filter,search])
@@ -229,7 +246,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     return(
         <div>
             <div>
-                <Pivot aria-label="Basic Pivot Example">
+                <Pivot>
                     <PivotItem headerText="Provider" 
                         onRenderItemLink={(item)=>{
                             return <div onClick={()=>{
@@ -261,9 +278,12 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 </div>
                 <div>
                     <div>
-                    <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)}/>
+                    <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)} disableAnimation/>
                     </div>
-                    <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />
+                    {
+                        props.user==='Admin' ? <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />:null
+
+                    }
                 </div>
             </div>
             <div>
@@ -272,7 +292,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             <div>
             <Pagination
                 currentPage={pagination.currentPage}
-                totalPages={Math.ceil(MData.length/pagination.displayItems)} 
+                totalPages={Math.ceil(pageFilter.length/pagination.displayItems)} 
                 onChange={(page) =>setPagination({...pagination,currentPage:page})}
                 limiter={3} 
                 />
