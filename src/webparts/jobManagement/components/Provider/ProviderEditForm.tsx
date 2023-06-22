@@ -160,7 +160,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     status:data.Status ? data.Status:'',
                     NokName:data.NokName ? data.NokName:'',
                     NokPhoneNo:data.NokPhoneNo ? data.NokPhoneNo:null,
-                    managerStatus:true
+                    managerStatus:data.Status === 'Approved' ? true:false
                 })
             }
         })

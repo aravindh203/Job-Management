@@ -115,10 +115,9 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         maxWidth:150,
         onRender:(item)=>{
             var managerAuthentication = item.Status === 'Draft' ? true:false;            
-            var adminAuthentication =  item.Status === 'Pending' ? true:false;
-            console.log('adminAuthentication',adminAuthentication);
-
-            if(props.user==='Admin'){
+            var adminAuthentication =  item.Status === 'Pending' || item.Status === 'Approved' || item.Status === 'Approved' || item.Status === 'Not Approved' ? true:false;
+            
+            if(props.user==='Admin'){                
                 return <IconButton iconProps={{ iconName: 'edit' }} disabled={adminAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
             }
             else if(props.user==='Manager'){
