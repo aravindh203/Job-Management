@@ -4,11 +4,13 @@ import { useState,useEffect } from 'react';
 import DashBoardComponent from './DashBoardComponent';
 import ProviderForm from './Provider/providerFrom';
 import ProviderEditForm from './Provider/ProviderEditForm';
+import { Spinner, SpinnerSize } from '@fluentui/react';
 interface IComponentChange{
     provider:boolean;
     ProviderEdit:boolean;
     clinet:boolean;
     contructor:boolean;
+    isSpinner:boolean;
 }
 interface IFormView{
     authentication:boolean;
@@ -16,7 +18,15 @@ interface IFormView{
     status:string;
 }
 const MainCoimponent=(props:any)=>{
-
+    const circle={
+        root:{
+            ".ms-Spinner-circle":{
+                width:"100px",
+                height:"100px",
+                borderWidth:"5px"
+            }
+        }
+    }
     const currentUser= props.context._pageContext._user.email;
     
     console.log('currentUser',currentUser);
@@ -29,7 +39,8 @@ const MainCoimponent=(props:any)=>{
         provider:false,
         ProviderEdit:false,
         clinet:false,
-        contructor:false
+        contructor:false,
+        isSpinner:false,
     })
     const [formView,setFormView]=React.useState<IFormView>({
         authentication:false,
@@ -132,6 +143,10 @@ const MainCoimponent=(props:any)=>{
             {
                 componentChange.ProviderEdit ? <ProviderEditForm  currentUser={currentUser} user={user} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null
             }
+            {
+                componentChange.isSpinner ? <Spinner styles={circle} />:null
+            }
+
         </>
      )
 }

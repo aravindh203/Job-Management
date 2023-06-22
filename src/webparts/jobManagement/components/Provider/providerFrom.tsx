@@ -107,9 +107,9 @@ const ProviderAddForm = (props:any):JSX.Element =>{
     }
  
     const handleSubmit = async (btnVal:string) =>{
-        
         var submitAuthetication = validation(btnVal);
-       
+        
+
         let newJson={
             ProviderName:data.Name,
             PhoneNo:data.PhoneNo,
@@ -121,11 +121,15 @@ const ProviderAddForm = (props:any):JSX.Element =>{
             Status:btnVal==='Add' ? 'Pending':'Draft'
         }
         if(submitAuthetication){
+            props.setChange({...props.change,provider:false,isSpinner:true})
             await sp.web.lists.getByTitle('ProviderList').items.add(newJson)
             .then((data)=>{
-                props.setChange({...props.change,provider:false})
+                props.setChange({...props.change,provider:false,isSpinner:false})
             })
-            .catch(error=>console.log('add error',error))
+            .catch(error=>{
+                console.log('add error',error);
+                props.setChange({...props.change,provider:true,isSpinner:false})
+            })
         }
     }
 

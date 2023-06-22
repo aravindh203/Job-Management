@@ -109,7 +109,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     }
  
     const handleUpdate = async () =>{
-        
         var updateAuthetication = validation();
         
         let newJson={
@@ -123,11 +122,15 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             Status:data.status === 'Draft' ? data.status:'Pending'
         }
         if(updateAuthetication){
+            props.setChange({...props.change,ProviderEdit:false,isSpinner:true})
             await sp.web.lists.getByTitle('ProviderList').items.getById(props.formView.Id).update(newJson)
             .then((data)=>{
-                props.setChange({...props.change,ProviderEdit:false})
+                props.setChange({...props.change,ProviderEdit:false,isSpinner:false})
             })
-            .catch(error=>handleError('provider update',error))
+            .catch(error=>{
+                handleError('provider update',error)
+                props.setChange({...props.change,ProviderEdit:true,isSpinner:false})
+            })
             
         }
     }
@@ -193,7 +196,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         </div>
                     </div>
                     <div className={styles.dropDown}>
-                        <Dropdown placeholder="Select options" label="Status" selectedKey={data.status === 'Pending' ? 'Add':'Draft'} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>
+                        { props.user==="Admin" ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status === 'Pending' ? 'Add':'Draft'} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
                     </div>
                     {
                         props.user === 'Manager' ? 
