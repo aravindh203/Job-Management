@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption, Icon } from '@fluentui/react';
+import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption, Icon, SearchBox } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
 import { Pagination } from "@pnp/spfx-controls-react/lib/pagination";
+import { trimStart } from '@microsoft/sp-lodash-subset';
 
 interface IData{
     Id:number;
@@ -131,6 +132,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         displayItems:5,
     }) 
     const [pageFilter,setPageFilter]=React.useState<IData[]>([])
+    const[search,setSearch]=React.useState<string>('')
+   
     const getData=async()=>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').get().then((data)=>{
             
@@ -205,6 +208,12 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
        
     }
+    const serachData=()=>{
+        var searchdata=[...MData].filter((value)=>{
+            return value.ProviderName.toLowerCase().startsWith(search.trimStart())
+        })
+        setFilterData([...searchdata])
+    }
     const errorFunction=(error:any,name:string)=>{
         console.log("error",error,name);
     }
@@ -214,7 +223,10 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     },[filter])
     React.useEffect(()=>{
         getPagination()
-    },[pagination,pageFilter])
+    },[pagination,pageFilter,search])
+    React.useEffect(()=>{
+        serachData()
+    },[search])
     React.useEffect(()=>{
         getData()  
     },[])
@@ -253,6 +265,9 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     </div>
                 </div>
                 <div>
+                    <div>
+                    <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)}/>
+                    </div>
                     <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />
                 </div>
             </div>
