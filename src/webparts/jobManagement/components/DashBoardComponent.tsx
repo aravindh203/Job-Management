@@ -174,8 +174,12 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 return value
             }
         })  
-        setFilterData([...filterData1]) 
-        setPageFilter([...filterData1])  
+        var searchdata=[...filterData1].filter((value)=>{
+            return value.ProviderName.toLowerCase().startsWith(search.trimStart())
+        })
+        setPageFilter([...searchdata])
+        // setFilterData([...filterData1]) 
+        // setPageFilter([...filterData1])  
      
     }
     const handlePageChange = () =>{
@@ -208,25 +212,16 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
        
     }
-    const serachData=()=>{
-        var searchdata=[...MData].filter((value)=>{
-            return value.ProviderName.toLowerCase().startsWith(search.trimStart())
-        })
-        setFilterData([...searchdata])
-    }
     const errorFunction=(error:any,name:string)=>{
         console.log("error",error,name);
     }
 
     React.useEffect(()=>{
         dropFilter()
-    },[filter])
+    },[filter,search])
     React.useEffect(()=>{
         getPagination()
-    },[pagination,pageFilter,search])
-    React.useEffect(()=>{
-        serachData()
-    },[search])
+    },[pagination,pageFilter])
     React.useEffect(()=>{
         getData()  
     },[])
