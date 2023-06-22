@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState,useEffect } from 'react';
 import { TextField } from '@fluentui/react/lib/TextField';
-import { Checkbox, DefaultButton, IconButton } from '@fluentui/react';
+import { Checkbox, DefaultButton, Dropdown, IconButton } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
 import styles from './providerForm.module.scss';
 
@@ -11,12 +11,14 @@ interface IProviderAdd{
     Email:string;
     FirstAddress:string;
     SecondAddress:string;
-    Nok:boolean;
     NokName:string;
     NokPhoneNo:number;
+    status:string;
 }
 
 const ProviderEditForm = (props:any):JSX.Element =>{
+
+    const isViewAuthentication = props.formView.status === 'view' ? true:false
     const text={
         root:{
             ".ms-TextField-fieldGroup":{
@@ -24,6 +26,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             }
         }
     }
+    const options = [
+        { key: 'Draft', text: 'Draft' },
+        { key: 'Add', text: 'Add' },
+    ]
+
     const [error,setError] = useState<string>('')
     const [data,setData] = useState<IProviderAdd>({
         Name:'',
@@ -31,10 +38,14 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         Email:'',
         FirstAddress:'',
         SecondAddress:'',
-        Nok:false,
+        status:'',
         NokName:'',
         NokPhoneNo:null,
-    })
+    })    
+
+    const handleError = (type:string,error:any):void =>{
+        console.log(error)
+    }
 
     const handleInputValue = (event:any):void =>{
         if(event.target.name==='Provider Name'){
@@ -52,9 +63,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         else if(event.target.name==='Second Address'){
             setData({...data,SecondAddress:event.target.value})
         }
-        else if(event.target.name==='Nok'){
-            setData({...data,Nok:event.target.checked})
-        }
         else if(event.target.name==='Nok Name'){
             setData({...data,NokName:event.target.value})
         }
@@ -63,11 +71,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         }
     }
 
-    const validation = (btnVal:string):boolean =>{
+    const validation = ():boolean =>{
         
         let isAllValueFilled=true;
         let emailvalidation=/^([A-Za-z0-9_.])+\@([g][m][a][i][l])+\.([c][o][m])+$/;
-        let addBtn = btnVal === 'Add' ? true:false;
+        let addBtn = data.status === 'Add' ? true:false;
 
         if(!data.Name){
             setError('please fill name')
@@ -85,19 +93,13 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             setError('please enter a address')
             isAllValueFilled = false;
         }
-        else if(data.Nok){
-            if((addBtn && !data.NokName) && true){
-                setError('please enter a Nok Name')
-                isAllValueFilled = false;
-            }
-            else if((addBtn && !(data.NokPhoneNo && data.NokPhoneNo.toString().length==10)) || (data.NokPhoneNo && data.NokPhoneNo.toString().length!==10)){
-                setError('please enter Nok mobile number')
-                isAllValueFilled = false;
-            }
-            else{
-                setError('')
-                isAllValueFilled = true;
-            }
+        else if((addBtn && !data.NokName) && true){
+            setError('please enter a Nok Name')
+            isAllValueFilled = false;
+        }
+        else if((addBtn && !(data.NokPhoneNo && data.NokPhoneNo.toString().length==10)) || (data.NokPhoneNo && data.NokPhoneNo.toString().length!==10)){
+            setError('please enter Nok mobile number')
+            isAllValueFilled = false;
         }
         else{
             setError('')
@@ -106,10 +108,9 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         return isAllValueFilled;
     }
  
-    const handleUpdate = async (btnVal:string) =>{
+    const handleUpdate = async () =>{
         
-        var updateAuthetication = validation(btnVal);
-        console.log('updateAuthetication',updateAuthetication);
+        var updateAuthetication = validation();
         
         let newJson={
             ProviderName:data.Name,
@@ -119,13 +120,14 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             NokName:data.NokName,
             NokPhoneNo:data.NokPhoneNo,
             Email:data.Email,
+            Status:data.status === 'Draft' ? data.status:'Pending'
         }
         if(updateAuthetication){
             await sp.web.lists.getByTitle('ProviderList').items.getById(props.formView.Id).update(newJson)
             .then((data)=>{
                 props.setChange({...props.change,ProviderEdit:false})
             })
-            .catch(error=>console.log('add error',error))
+            .catch(error=>handleError('provider update',error))
             
         }
     }
@@ -140,13 +142,13 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     Email:data.Email ? data.Email:'',
                     FirstAddress:data.ContactAdd ? data.ContactAdd:'',
                     SecondAddress:data.SecondaryAdd ? data.SecondaryAdd:'',
-                    Nok:false,
+                    status:data.Status ? data.Status:'',
                     NokName:data.NokName ? data.NokName:'',
                     NokPhoneNo:data.NokPhoneNo ? data.NokPhoneNo:null,
                 })
             }
         })
-        .catch(error=>console.log('provider get',error))
+        .catch(error=>handleError('provider edit get',error))
     }
 
     useEffect(()=>{
@@ -159,45 +161,49 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         <div className={styles.contain}>
             <div className={styles.formContainer}>
                 <div className={styles.cancelBox}>
+                    <h3>Provider {isViewAuthentication ? 'View':'Edit'} Form</h3>
                     <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,ProviderEdit:false})}}/>
                 </div>
                 <div className={styles.formContent}>
                     <div className={styles.inputAlign}>
                         <div>
-                        <TextField value={data.Name} label='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                            <TextField value={data.Name} label='Provider Name' styles={text} name='Provider Name' onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                         </div>
                         <div>
-                        <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} label='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                            <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} label='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
                     <div>
-                    <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                        <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                     </div>
                     <div className={styles.inputAlign}>
                         <div>
-                        <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                            <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                         </div>
                         <div>
-                            <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                            <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
                     <div className={styles.inputAlign}>
                         <div>
-                            <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                            <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                         </div>
                         <div>
-                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={props.formView.status==='view' ? true:false}/>
+                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                         </div>
+                    </div>
+                    <div className={styles.dropDown}>
+                        <Dropdown placeholder="Select options" label="Status" selectedKey={data.status === 'Pending' ? 'Add':'Draft'} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>
                     </div>
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
-                        {
-                        props.formView.status!=='view' ?
-                            <DefaultButton text='Update' onClick={()=>handleUpdate('Add')}/>
-                        :
-                            null
-                        }
+                            {
+                            props.formView.status!=='view' ?
+                                <DefaultButton text='Update' onClick={()=>handleUpdate()}/>
+                            :
+                                null
+                            }
                         </div>
                     </div>
                 </div>
