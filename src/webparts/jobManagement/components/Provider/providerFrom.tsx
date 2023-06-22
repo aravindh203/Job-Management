@@ -108,8 +108,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
  
     const handleSubmit = async (btnVal:string) =>{
         var submitAuthetication = validation(btnVal);
-        
-
+    
         let newJson={
             ProviderName:data.Name,
             PhoneNo:data.PhoneNo,
@@ -177,6 +176,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
                         :
                         null
                     }
+                    <input type='file' onChange={(event)=>console.log('event',event.target.files)} />
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
