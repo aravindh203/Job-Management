@@ -195,6 +195,17 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     <div className={styles.dropDown}>
                         <Dropdown placeholder="Select options" label="Status" selectedKey={data.status === 'Pending' ? 'Add':'Draft'} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>
                     </div>
+                    {
+                        props.user === 'Manager' ? 
+                        (
+                            <div>
+                                <Checkbox label='Approved' name='Approved' onChange={(event)=>handleInputValue(event)} disabled={false} />
+                                <Checkbox label='Not Aproved' name='notAproved' onChange={(event)=>handleInputValue(event)} disabled={false} />
+                            </div>
+                        )
+                        :
+                        null
+                    }
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
