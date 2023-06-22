@@ -57,7 +57,6 @@ const MainCoimponent=(props:any)=>{
             if(isVisitorAuthentication){
                 setUser('Visitor');
             } 
-            
         })
         .catch(error=>handleError('get group Admin',error))
     }
@@ -87,10 +86,12 @@ const MainCoimponent=(props:any)=>{
     const getAdmin = async () =>{
         await sp.web.siteGroups.getByName('Admin').users.get()
         .then(data=>{
+            console.log('admin data',data);
+            
             let isAdminAuthentication = false;
             if(data.length){
                 data.forEach(value=>{
-                    if(value.Email=currentUser){
+                    if(value.Email===currentUser){
                         isAdminAuthentication = true;
                     } 
                     else isAdminAuthentication = false;
@@ -123,13 +124,13 @@ const MainCoimponent=(props:any)=>{
     return(
         <>
             {
-                dbAuthentication ?  <DashBoardComponent change={componentChange} setChange={setComponentChange} setFormView={setFormView}/>:null
+                dbAuthentication ?  <DashBoardComponent currentUser={currentUser} user={user} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/>:null
             }  
             {
                 componentChange.provider ? <ProviderForm change={componentChange} setChange={setComponentChange}/>:null
             }      
             {
-                componentChange.ProviderEdit ? <ProviderEditForm change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null
+                componentChange.ProviderEdit ? <ProviderEditForm  currentUser={currentUser} user={user} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null
             }
         </>
      )
