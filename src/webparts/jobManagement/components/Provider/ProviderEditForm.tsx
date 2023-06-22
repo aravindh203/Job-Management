@@ -14,6 +14,7 @@ interface IProviderAdd{
     NokName:string;
     NokPhoneNo:number;
     status:string;
+    managerStatus:boolean;
 }
 
 const ProviderEditForm = (props:any):JSX.Element =>{
@@ -41,8 +42,10 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         status:'',
         NokName:'',
         NokPhoneNo:null,
+        managerStatus:true
     })    
-
+    console.log("stats",data.status);
+    
     const handleError = (type:string,error:any):void =>{
         console.log(error)
     }
@@ -66,9 +69,16 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         else if(event.target.name==='Nok Name'){
             setData({...data,NokName:event.target.value})
         }
-        else{
+        else if(event.target.name==='Nok Phone No'){
             setData({...data,NokPhoneNo:event.target.value})
         }
+        else if(event.target.name==='Approved'){
+            setData({...data,managerStatus:true})
+        }
+        else{
+            setData({...data,managerStatus:false})
+        }
+        
     }
 
     const validation = ():boolean =>{
@@ -110,7 +120,8 @@ const ProviderEditForm = (props:any):JSX.Element =>{
  
     const handleUpdate = async () =>{
         var updateAuthetication = validation();
-        
+        var managerStatus=data.managerStatus ? 'Approved':'Not Approved'
+        var adminStatus=data.status === 'Draft' ? data.status:'Pending'
         let newJson={
             ProviderName:data.Name,
             PhoneNo:data.PhoneNo,
@@ -119,7 +130,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             NokName:data.NokName,
             NokPhoneNo:data.NokPhoneNo,
             Email:data.Email,
-            Status:data.status === 'Draft' ? data.status:'Pending'
+            Status:props.user === 'Manager' ? managerStatus:adminStatus
         }
         if(updateAuthetication){
             props.setChange({...props.change,ProviderEdit:false,isSpinner:true})
@@ -138,6 +149,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     const getData = async () =>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
         .then(data=>{
+           
             if(data){
                 setData({
                     Name:data.ProviderName ? data.ProviderName:'',
@@ -148,6 +160,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     status:data.Status ? data.Status:'',
                     NokName:data.NokName ? data.NokName:'',
                     NokPhoneNo:data.NokPhoneNo ? data.NokPhoneNo:null,
+                    managerStatus:true
                 })
             }
         })
@@ -196,14 +209,14 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         </div>
                     </div>
                     <div className={styles.dropDown}>
-                        { props.user==="Admin" ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status === 'Pending' ? 'Add':'Draft'} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
+                        { props.user==="Admin" ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
                     </div>
                     {
                         props.user === 'Manager' ? 
                         (
                             <div>
-                                <Checkbox label='Approved' name='Approved' onChange={(event)=>handleInputValue(event)} disabled={false} />
-                                <Checkbox label='Not Aproved' name='notAproved' onChange={(event)=>handleInputValue(event)} disabled={false} />
+                                <Checkbox label='Approved' name='Approved'checked={data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
+                                <Checkbox label='Not Approved' name='Not Approved' checked={!data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
                             </div>
                         )
                         :
