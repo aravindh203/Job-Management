@@ -2,6 +2,8 @@ import * as React from 'react';
 import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption, Icon } from '@fluentui/react';
 import {sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
+import { Pagination } from "@pnp/spfx-controls-react/lib/pagination";
+
 interface IData{
     Id:number;
     ProviderName:string;
@@ -13,6 +15,7 @@ interface IData{
     Email:string;
     Status:string;
 }
+
 const DashBoardComponent=(props:any):JSX.Element=>{    
     const addIcon={
         root:{
@@ -118,12 +121,16 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         maxWidth:150,
         onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewHandle(item)}}/>)
     }]
-
+    
     const [pageRender,setPageRender]=React.useState<string>('Provider')
     const [MData,setMData]=React.useState<IData[]>([])
     const [filter,setFilter]=React.useState<string>('All')
     const [filterData,setFilterData]=React.useState<IData[]>([])
-     
+    const [pagination,setPagination]=React.useState({
+        currentPage:1,
+        displayItems:5,
+    }) 
+    const [pageFilter,setPageFilter]=React.useState<IData[]>([])
     const getData=async()=>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').get().then((data)=>{
             
@@ -143,6 +150,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             })
             setMData(masterData);
             setFilterData(masterData);
+            setPageFilter(masterData)
         }).catch((error)=>{
             errorFunction(error,"getData")
         })
@@ -162,9 +170,10 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             else{
                 return value
             }
-        })
-         
-        setFilterData([...filterData1])
+        })  
+        setFilterData([...filterData1]) 
+        setPageFilter([...filterData1])  
+     
     }
     const handlePageChange = () =>{
         if(pageRender==='Provider'){
@@ -185,6 +194,17 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             props.setChange({...props.change,ProviderEdit:true})
         }
     }
+    const getPagination=()=>{
+        
+        if(pageFilter.length>0){
+        
+            let lastIndex=pagination.currentPage*pagination.displayItems
+            let firstIndex=lastIndex-pagination.displayItems
+            let displayData=[...pageFilter].slice(firstIndex,lastIndex)
+            setFilterData(displayData)    
+        }
+       
+    }
     const errorFunction=(error:any,name:string)=>{
         console.log("error",error,name);
     }
@@ -192,9 +212,11 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     React.useEffect(()=>{
         dropFilter()
     },[filter])
-
     React.useEffect(()=>{
-        getData()
+        getPagination()
+    },[pagination,pageFilter])
+    React.useEffect(()=>{
+        getData()  
     },[])
     
     return(
@@ -236,6 +258,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             </div>
             <div>
                 <DetailsList items={filterData} columns={col} selectionMode={SelectionMode.none} styles={list}/>
+            </div>
+            <div>
+            <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={Math.ceil(MData.length/pagination.displayItems)} 
+                onChange={(page) =>setPagination({...pagination,currentPage:page})}
+                limiter={3} 
+                />
             </div>
         </div>)}
             
