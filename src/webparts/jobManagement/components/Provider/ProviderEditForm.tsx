@@ -15,6 +15,9 @@ interface IProviderAdd{
     NokPhoneNo:number;
     status:string;
     managerStatus:boolean;
+    files:any,
+    updateFiles:any,
+    deleteFiles:any
 }
 
 const ProviderEditForm = (props:any):JSX.Element =>{
@@ -33,6 +36,8 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     ]
 
     const [error,setError] = useState<string>('')
+    const [folderName,setFolderName] =useState<string>('')
+    
     const [data,setData] = useState<IProviderAdd>({
         Name:'',
         PhoneNo:null,
@@ -42,9 +47,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         status:'',
         NokName:'',
         NokPhoneNo:null,
-        managerStatus:true
+        managerStatus:true,
+        files:[],
+        updateFiles:[],
+        deleteFiles:[]
     })    
-    console.log("stats",data.status);
     
     const handleError = (type:string,error:any):void =>{
         console.log(error)
@@ -135,7 +142,41 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         if(updateAuthetication){
             props.setChange({...props.change,ProviderEdit:false,isSpinner:true})
             await sp.web.lists.getByTitle('ProviderList').items.getById(props.formView.Id).update(newJson)
-            .then((data)=>{
+            .then( async (result)=>{
+                
+                await sp.web.rootFolder.folders.getByName("ProviderAttachment").folders.filter('Name eq ' + "'" + folderName + "'").get()
+                .then(async (results)=>{
+                    
+                    for(let i=0;i<data.deleteFiles.length;i++){
+                        await sp.web.getFileByServerRelativePath(data.deleteFiles[i].ServerRelativeUrl).delete()
+                        .then(res=>console.log('del response',res))
+                        .catch(error=>console.log(error))
+                    }
+
+                    for(let j=0;j<data.updateFiles.length;j++){
+                        await sp.web.getFolderByServerRelativePath(results[0].ServerRelativeUrl)
+                        .files.addUsingPath(data.updateFiles[j].name,data.updateFiles[j], { Overwrite: true })
+                        .then(result=>console.log('data updated succesfully'))
+                        .catch(error=>console.log(error))
+                    }
+                    
+                    
+                    // await sp.web.getFolderByServerRelativePath(results[0].ServerRelativeUrl).files.get()
+                    // .then( async (res)=>{
+                    //     console.log('res',res)
+                    //     // for(let i=0;i<data.deleteFiles.length;i++){
+                    //     //     console.log('url',data.deleteFiles[i].ServerRelativeUrl);
+                            
+                    //     //     await sp.web.getFolderByServerRelativePath(data.deleteFiles[i].ServerRelativeUrl).files.get()
+                    //     //     .then(res=>console.log('del res',res))
+                    //     //     .catch(error=>console.log(error))
+                    //     // }
+                    // })
+                    // .catch(error=>console.log(error))
+                    // // console.log('update folder result',results);
+                    
+                })
+                .catch(error=>console.log(error))
                 props.setChange({...props.change,ProviderEdit:false,isSpinner:false})
             })
             .catch(error=>{
@@ -148,24 +189,80 @@ const ProviderEditForm = (props:any):JSX.Element =>{
 
     const getData = async () =>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
-        .then(data=>{
-           
+        .then(async (data)=>{
             if(data){
-                setData({
-                    Name:data.ProviderName ? data.ProviderName:'',
-                    PhoneNo:data.PhoneNo ? data.PhoneNo:null,
-                    Email:data.Email ? data.Email:'',
-                    FirstAddress:data.ContactAdd ? data.ContactAdd:'',
-                    SecondAddress:data.SecondaryAdd ? data.SecondaryAdd:'',
-                    status:data.Status ? data.Status:'',
-                    NokName:data.NokName ? data.NokName:'',
-                    NokPhoneNo:data.NokPhoneNo ? data.NokPhoneNo:null,
-                    managerStatus:data.Status === 'Approved' ? true:false
-                })
+                await sp.web.rootFolder.folders.getByName("ProviderAttachment").folders.select('*,Id').filter('Name eq ' + "'" + data.Id + "'").get()
+                .then( async (result)=>{
+                         setFolderName(result[0].Name)
+                         await sp.web.getFolderByServerRelativePath(result[0].ServerRelativeUrl).files.get()
+                         .then((result)=>{
+                             
+                             setData({
+                                Name:data.ProviderName ? data.ProviderName:'',
+                                PhoneNo:data.PhoneNo ? data.PhoneNo:null,
+                                Email:data.Email ? data.Email:'',
+                                FirstAddress:data.ContactAdd ? data.ContactAdd:'',
+                                SecondAddress:data.SecondaryAdd ? data.SecondaryAdd:'',
+                                status:data.Status ? data.Status:'',
+                                NokName:data.NokName ? data.NokName:'',
+                                NokPhoneNo:data.NokPhoneNo ? data.NokPhoneNo:null,
+                                managerStatus:data.Status === 'Approved' ? true:false,
+                                files:result.length ? result:[],
+                                updateFiles:[],
+                                deleteFiles:[]
+                             })
+                         })
+                         .catch((error)=>console.log(error))
+                     }).catch((error)=>{
+                         console.log('error',error);
+                     })
             }
         })
         .catch(error=>handleError('provider edit get',error))
     }
+
+    const handleFileClose = (value,index) =>{
+        var currentFiles = [...data.files]
+        currentFiles.splice(index,1);
+
+        var delFiles = [...data.deleteFiles,value];
+
+        setData({...data,files:currentFiles,deleteFiles:delFiles})
+
+    }
+
+    const handleUpdateFileClose = (value,index) =>{
+        var newUpdateFiles = [...data.updateFiles];
+        newUpdateFiles.splice(index,1)
+
+        setData({...data,updateFiles:newUpdateFiles})
+    }
+
+    const handleUpdateFile = (event) =>{
+
+        var updatedfiles=[]
+        for(let i=0;i<event.target.files.length;i++){
+
+            
+            let existAuthendication = [...data.files].some(value=>{value.Name===event.target.files[i].name})
+            
+            if(!existAuthendication){
+                updatedfiles.push(event.target.files[i])
+            }
+
+        }
+
+       setData({...data,updateFiles:updatedfiles})
+     
+    }
+
+    // const getData = async () =>{
+    //     await sp.web.lists.getByTitle('ProviderAttachment').items.select('*').expand('File').get().then((data)=>{
+    //         console.log('attachment data',data);
+    //     }).catch((error)=>{
+    //         console.log('error',error);
+    //     })
+    // }
 
     useEffect(()=>{
         if(props.formView.authentication){
@@ -209,19 +306,63 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         </div>
                     </div>
                     <div className={styles.dropDown}>
-                        { props.user==="Admin" ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
+                        { props.user==="Admin" && data.status === 'Draft' ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
                     </div>
-                    {
-                        props.user === 'Manager' ? 
+                    {props.formView.status!=='view' ?
                         (
-                            <div>
-                                <Checkbox label='Approved' name='Approved'checked={data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
-                                <Checkbox label='Not Approved' name='Not Approved' checked={!data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
-                            </div>
+                            props.user === 'Manager' ? 
+                                (
+                                    <div>
+                                        <Checkbox label='Approved' name='Approved'checked={data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
+                                        <Checkbox label='Not Approved' name='Not Approved' checked={!data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
+                                    </div>
+                                )
+                                :
+                                null
                         )
-                        :
-                        null
+                        : 
+                        <TextField value={data.status} styles={text} label='Status' disabled={isViewAuthentication}/>
+                        
                     }
+                    <div>
+                        {
+                            data.files.length ? 
+                            (
+                                data.files.map((value,index)=>{
+                                    return (
+                                        <div key={index}>
+                                            <a href={value.ServerRelativeUrl+'? web=1'}>{value.Name}</a>
+                                            {props.user === 'Admin'  &&  <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(value,index)}/>}
+                                        </div>
+                                    )
+                                })
+                            )
+                            :
+                            null
+                        }
+                    </div>
+                    {props.user === 'Admin' && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
+                    <div>
+                        {  
+                            data.updateFiles.length ? 
+                                (
+                                    data.updateFiles.map((value,index)=>{
+                                        return (
+                                            <div key={index}>
+                                                <a href='#'>{value.name}</a>
+                                                {
+                                                    props.user === 'Admin' ? 
+                                                    <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleUpdateFileClose(value,index)}/>
+                                                    :null
+                                                }
+                                            </div>
+                                        )
+                                    })
+                                )
+                                :
+                                null
+                        }
+                    </div>
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
