@@ -55,16 +55,8 @@ const MainCoimponent=(props:any)=>{
     const getVisitors= async () =>{
         await sp.web.siteGroups.getByName('Visitors').users.get()
         .then(data=>{
-            let isVisitorAuthentication = false;
-            if(data.length){
-                data.forEach(value=>{
-                    if(value.Email=currentUser){
-                        isVisitorAuthentication = true;
-                    } 
-                    else isVisitorAuthentication = false;
-                })
-            }
-
+            let isVisitorAuthentication = data.some(value=>value.Email===currentUser);
+            
             if(isVisitorAuthentication){
                 setUser('Visitor');
             } 
@@ -76,15 +68,8 @@ const MainCoimponent=(props:any)=>{
     const getManagers = async () =>{
         await sp.web.siteGroups.getByName('Manager').users.get()
         .then(data=>{
-            let ismanagerAuthentication = false;
-            if(data.length){
-                data.forEach(value=>{
-                    if(value.Email=currentUser){
-                        ismanagerAuthentication = true;
-                    } 
-                    else ismanagerAuthentication = false;
-                })
-            }
+            let ismanagerAuthentication = data.some(value=>value.Email===currentUser);
+            
 
             if(!ismanagerAuthentication){
                 getVisitors();
@@ -98,17 +83,9 @@ const MainCoimponent=(props:any)=>{
         await sp.web.siteGroups.getByName('Admin').users.get()
         .then(data=>{
             console.log('admin data',data);
+            let isAdminAuthentication = data.some(value=>value.Email===currentUser)
+            console.log('isAdminAuthentication',isAdminAuthentication);
             
-            let isAdminAuthentication = false;
-            if(data.length){
-                data.forEach(value=>{
-                    if(value.Email===currentUser){
-                        isAdminAuthentication = true;
-                    } 
-                    else isAdminAuthentication = false;
-                })
-            }
-
             if(!isAdminAuthentication){
                 getManagers();
             } 
@@ -116,7 +93,6 @@ const MainCoimponent=(props:any)=>{
         })
         .catch(error=>handleError('get group Admin',error))
     }
-    
     
     useEffect(()=>{
         getAdmin()

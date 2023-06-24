@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState,useEffect } from 'react';
 import { TextField } from '@fluentui/react/lib/TextField';
 import { Checkbox, DefaultButton, IconButton } from '@fluentui/react';
-import {sp} from "@pnp/sp/presets/all";
+import {Files, sp} from "@pnp/sp/presets/all";
 import styles from './providerForm.module.scss';
 
 interface IProviderAdd{
@@ -14,6 +14,7 @@ interface IProviderAdd{
     Nok:boolean;
     NokName:string;
     NokPhoneNo:number;
+    Files:any;
 }
 
 const ProviderAddForm = (props:any):JSX.Element =>{
@@ -34,7 +35,8 @@ const ProviderAddForm = (props:any):JSX.Element =>{
         Nok:false,
         NokName:'',
         NokPhoneNo:null,
-    })
+        Files:[]
+    })    
 
     const handleInputValue = (event:any):void =>{
         if(event.target.name==='Provider Name'){
@@ -58,13 +60,17 @@ const ProviderAddForm = (props:any):JSX.Element =>{
         else if(event.target.name==='Nok Name'){
             setData({...data,NokName:event.target.value})
         }
+        else if(event.target.name==='file'){
+            setData({...data,Files:event.target.files})
+        }
         else{
             setData({...data,NokPhoneNo:event.target.value})
         }
     }
 
     const validation = (btnVal:string):boolean =>{
-        
+               // return false;
+
         let isAllValueFilled=true;
         let emailvalidation=/^([A-Za-z0-9_.])+\@([g][m][a][i][l])+\.([c][o][m])+$/;
         let addBtn = btnVal === 'Add' ? true:false;
@@ -122,7 +128,8 @@ const ProviderAddForm = (props:any):JSX.Element =>{
         if(submitAuthetication){
             props.setChange({...props.change,provider:false,isSpinner:true})
             await sp.web.lists.getByTitle('ProviderList').items.add(newJson)
-            .then((data)=>{
+            .then((result)=>{                                
+                createFolder(result.data.Id);
                 props.setChange({...props.change,provider:false,isSpinner:false})
             })
             .catch(error=>{
@@ -131,6 +138,33 @@ const ProviderAddForm = (props:any):JSX.Element =>{
             })
         }
     }
+
+    async function createFolder(ItemID)
+    {
+        //await sp.web.lists.getByTitle('ProviderAttachment').rootFolder.folders.add(ItemID)
+        await sp.web.rootFolder.folders.getByName("ProviderAttachment").folders.addUsingPath(ItemID.toString(),true)
+        .then(async (result)=> 
+        {
+            // Create a file inside the newly created folder
+            for(let i=0;i<data.Files.length;i++){
+                sp.web.getFolderByServerRelativePath(result.data.ServerRelativeUrl).files.addUsingPath(data.Files[i].name, data.Files[i], { Overwrite: true })
+                //await result.folder.files.add(data.Files[i].name, data.Files[i])
+                .then(async (file) => {
+                    await console.log('File created successfully:', file);
+                })
+                .catch(async (error) => {
+                    await console.log('Error creating file:', error);
+                });
+            }
+            
+        })
+        .catch(error => {
+            console.log('Error creating folder:', error);
+        });
+
+    }
+
+    
 
     return(
         <div className={styles.contain}>
@@ -176,7 +210,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
                         :
                         null
                     }
-                    <input type='file' onChange={(event)=>console.log('event',event.target.files)} />
+                    <input name='file' type='file' onChange={(event)=>handleInputValue(event)} multiple />
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
