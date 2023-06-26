@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption, Icon, SearchBox } from '@fluentui/react';
-import {sp} from "@pnp/sp/presets/all";
+import {Item, sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
 import { Pagination } from "@pnp/spfx-controls-react/lib/pagination";
 import { trimStart } from '@microsoft/sp-lodash-subset';
@@ -15,6 +15,7 @@ interface IData{
     NokPhoneNo:number;
     Email:string;
     Status:string;
+    CreatedBy:string;
 }
 
 const DashBoardComponent=(props:any):JSX.Element=>{    
@@ -114,18 +115,21 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         minWidth:100,
         maxWidth:150,
         onRender:(item)=>{
-            var managerAuthentication = item.Status === 'Draft' ? true:false;            
-            var adminAuthentication =  item.Status === 'Pending' || item.Status === 'Approved' || item.Status === 'Approved' || item.Status === 'Not Approved' ? true:false;
+            let userAuthentication= findUserAccess(item)
+           
+            // var managerAuthentication = item.Status === 'Draft' ? true:false;            
+            // var adminAuthentication =  item.Status === 'Pending' || item.Status === 'Approved' || item.Status === 'Approved' || item.Status === 'Not Approved' ? true:false;
             
-            if(props.user==='Admin'){                
-                return <IconButton iconProps={{ iconName: 'edit' }} disabled={adminAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
-            }
-            else if(props.user==='Manager'){
-                return <IconButton iconProps={{ iconName: 'edit' }} disabled={managerAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
-            }
-            else{
-                return <IconButton iconProps={{ iconName: 'edit' }} disabled={true} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
-            }
+            // if(props.user==='Admin'){                
+            //     return <IconButton iconProps={{ iconName: 'edit' }} disabled={adminAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
+            // }
+            // else if(props.user==='Manager'){
+            //     return <IconButton iconProps={{ iconName: 'edit' }} disabled={managerAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
+            // }
+            // else{
+            //     return <IconButton iconProps={{ iconName: 'edit' }} disabled={true} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
+            // }
+           return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
         }
     },{
         key:'10',
@@ -135,7 +139,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         maxWidth:150,
         onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewHandle(item)}}/>)
     }]
-    
+    let addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
     const [pageRender,setPageRender]=React.useState<string>('Provider')
     const [MData,setMData]=React.useState<IData[]>([])
     const [filter,setFilter]=React.useState<string>('All')
@@ -146,12 +150,28 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }) 
     const [pageFilter,setPageFilter]=React.useState<IData[]>([])
     const[search,setSearch]=React.useState<string>('')
-   
+    const [isEdit,setIsEdit]=React.useState<boolean>(false)
+    const findUserAccess=(item)=>{
+        console.log("item",item);
+        
+        let isEdit = true;
+        if(props.admin && props.manager){
+            isEdit = false
+        }else if(props.admin && item.Status=="Draft" && item.CreatedBy==props.currentUser){
+            isEdit = false
+        }else if(props.manager && item.Status==="Pending"){
+            isEdit = false
+        }
+    
+        return isEdit
+    }
     const getData=async()=>{
-        await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').get().then((data)=>{
+        await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
             
             let masterData:IData[]=[]
             data.forEach((item)=>{
+                console.log('itemthft',item);
+                
                 masterData.push({
                     Id:item.Id ? item.Id:null,
                     ProviderName:item.ProviderName ? item.ProviderName:'',
@@ -161,7 +181,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     NokName:item.NokName ? item.NokName:'',
                     NokPhoneNo:item.NokPhoneNo ? item.NokPhoneNo:null,
                     Email:item.Email ? item.Email:'',
-                    Status:item.Status ? item.Status:''
+                    Status:item.Status ? item.Status:'',
+                    CreatedBy:item.Author.EMail ? item.Author.EMail:''
                 })
             })
             setMData(masterData);
@@ -277,10 +298,10 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 </div>
                 <div>
                     <div>
-                    <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)} disableAnimation/>
+                        <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)} disableAnimation/>
                     </div>
                     {
-                        props.user==='Admin' ? <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />:null
+                        addFormViewFlag ? <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />:null
 
                     }
                 </div>

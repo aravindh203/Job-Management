@@ -32,6 +32,8 @@ const MainCoimponent=(props:any)=>{
     const [admin,setAdmin ] =useState<boolean>(false);
     const [manager,setManager]=useState<boolean>(false)
     const [Visitors,setVisitor]=useState<boolean>(false)
+    console.log("user",admin,manager,Visitors);
+    
     const [dbAuthentication,setDbAuthentication] = useState<boolean>(true)
     const [componentChange,setComponentChange]=React.useState<IComponentChange>({
         provider:false,
@@ -49,12 +51,7 @@ const MainCoimponent=(props:any)=>{
     const handleError = (type:string,error:any):void =>{
         console.log(type,error)
     }
-    const getUserAccess=()=>
-    {
-        getAdmin()
-        getManagers()
-        getVisitors()   
-    } 
+   
     const getVisitors= async () =>{
         await sp.web.siteGroups.getByName('Visitors').users.get()
         .then(data=>{
@@ -70,6 +67,7 @@ const MainCoimponent=(props:any)=>{
         .then(data=>{
             let ismanagerAuthentication = data.some(value=>value.Email===currentUser);
             setManager(ismanagerAuthentication)
+            getVisitors()
         })
         .catch(error=>handleError('get group manager',error))
     }
@@ -81,12 +79,13 @@ const MainCoimponent=(props:any)=>{
             let isAdminAuthentication = data.some(value=>value.Email===currentUser)
             console.log('isAdminAuthentication',isAdminAuthentication);
             setAdmin(isAdminAuthentication)
+            getManagers()
         })
         .catch(error=>handleError('get group Admin',error))
     }
     
     useEffect(()=>{
-        getUserAccess()
+        getAdmin()
     },[])
 
     useEffect(()=>{
