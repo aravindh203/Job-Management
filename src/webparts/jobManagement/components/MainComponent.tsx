@@ -29,8 +29,9 @@ const MainCoimponent=(props:any)=>{
     }
     const currentUser= props.context._pageContext._user.email;
     
-    const [user,setUser] =useState<string>('')
-    
+    const [admin,setAdmin ] =useState<boolean>(false);
+    const [manager,setManager]=useState<boolean>(false)
+    const [Visitors,setVisitor]=useState<boolean>(false)
     const [dbAuthentication,setDbAuthentication] = useState<boolean>(true)
     const [componentChange,setComponentChange]=React.useState<IComponentChange>({
         provider:false,
@@ -48,15 +49,17 @@ const MainCoimponent=(props:any)=>{
     const handleError = (type:string,error:any):void =>{
         console.log(type,error)
     }
-
+    const getUserAccess=()=>
+    {
+        getAdmin()
+        getManagers()
+        getVisitors()   
+    } 
     const getVisitors= async () =>{
         await sp.web.siteGroups.getByName('Visitors').users.get()
         .then(data=>{
             let isVisitorAuthentication = data.some(value=>value.Email===currentUser);
-            
-            if(isVisitorAuthentication){
-                setUser('Visitor');
-            } 
+            setVisitor(isVisitorAuthentication)
         })
         .catch(error=>handleError('get group Admin',error))
     }
@@ -66,12 +69,7 @@ const MainCoimponent=(props:any)=>{
         await sp.web.siteGroups.getByName('Manager').users.get()
         .then(data=>{
             let ismanagerAuthentication = data.some(value=>value.Email===currentUser);
-            
-
-            if(!ismanagerAuthentication){
-                getVisitors();
-            } 
-            else setUser('Manager');
+            setManager(ismanagerAuthentication)
         })
         .catch(error=>handleError('get group manager',error))
     }
@@ -82,17 +80,13 @@ const MainCoimponent=(props:any)=>{
             console.log('admin data',data);
             let isAdminAuthentication = data.some(value=>value.Email===currentUser)
             console.log('isAdminAuthentication',isAdminAuthentication);
-            
-            if(!isAdminAuthentication){
-                getManagers();
-            } 
-            else setUser('Admin');
+            setAdmin(isAdminAuthentication)
         })
         .catch(error=>handleError('get group Admin',error))
     }
     
     useEffect(()=>{
-        getAdmin()
+        getUserAccess()
     },[])
 
     useEffect(()=>{
@@ -108,13 +102,13 @@ const MainCoimponent=(props:any)=>{
     return(
         <>
             {
-                dbAuthentication ?  <DashBoardComponent currentUser={currentUser} user={user} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/>:null
+                dbAuthentication ?  <DashBoardComponent currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/>:null
             }  
             {
-                componentChange.provider ? <ProviderForm change={componentChange} setChange={setComponentChange} formView={formView}/>:null
+                componentChange.provider ? <ProviderForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/>:null
             }      
             {
-                componentChange.ProviderEdit ? <ProviderEditForm  currentUser={currentUser} user={user} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null
+                componentChange.ProviderEdit ? <ProviderEditForm  currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null
             }
             {
                 componentChange.isSpinner ? <Spinner styles={circle} />:null

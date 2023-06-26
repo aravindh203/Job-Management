@@ -317,7 +317,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         (
                             props.user === 'Manager' ? 
                                 (
-                                    <div>
+                                    <div className={styles.approvedStatus}>
                                         <Checkbox label='Approved' name='Approved'checked={data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
                                         <Checkbox label='Not Approved' name='Not Approved' checked={!data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
                                     </div>
