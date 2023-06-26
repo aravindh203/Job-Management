@@ -31,9 +31,7 @@ const MainCoimponent=(props:any)=>{
     
     const [admin,setAdmin ] =useState<boolean>(false);
     const [manager,setManager]=useState<boolean>(false)
-    const [Visitors,setVisitor]=useState<boolean>(false)
-    console.log("user",admin,manager,Visitors);
-    
+    const [Visitors,setVisitor]=useState<boolean>(false)    
     const [dbAuthentication,setDbAuthentication] = useState<boolean>(true)
     const [componentChange,setComponentChange]=React.useState<IComponentChange>({
         provider:false,
@@ -75,9 +73,7 @@ const MainCoimponent=(props:any)=>{
     const getAdmin = async () =>{
         await sp.web.siteGroups.getByName('Admin').users.get()
         .then(data=>{
-            console.log('admin data',data);
             let isAdminAuthentication = data.some(value=>value.Email===currentUser)
-            console.log('isAdminAuthentication',isAdminAuthentication);
             setAdmin(isAdminAuthentication)
             getManagers()
         })
