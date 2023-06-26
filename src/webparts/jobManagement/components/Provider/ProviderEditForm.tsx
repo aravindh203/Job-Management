@@ -126,7 +126,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
  
     const handleUpdate = async () =>{
         var updateAuthetication = validation();
-        var managerStatus=data.managerStatus ? 'Approved':'Not Approved'
+        var managerStatus=data.managerStatus ? 'Approved':'Rejected'
         var adminStatus=data.status === 'Draft' ? data.status:'Pending'
         let newJson={
             ProviderName:data.Name,
@@ -223,7 +223,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         var updatedfiles=[]
         for(let i=0;i<event.target.files.length;i++){
 
-            
             let existAuthendication = [...data.files].some(value=>{value.Name===event.target.files[i].name})
             
             if(!existAuthendication){
@@ -278,15 +277,15 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         </div>
                     </div>
                     <div className={styles.dropDown}>
-                        { props.admin && !isViewAuthentication ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
+                        { props.admin && !isViewAuthentication && data.status === 'Draft' && <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>}
                     </div>
                     {!isViewAuthentication ?
                         (
-                            props.manager ? 
+                            props.manager && data.status !== 'Draft' ? 
                                 (
                                     <div className={styles.approvedStatus}>
                                         <Checkbox label='Approved' name='Approved'checked={data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
-                                        <Checkbox label='Not Approved' name='Not Approved' checked={!data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
+                                        <Checkbox label='Rejected' name='Not Approved' checked={!data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
                                     </div>
                                 )
                                 :
