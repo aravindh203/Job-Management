@@ -51,9 +51,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         files:[],
         updateFiles:[],
         deleteFiles:[]
-    })    
-    console.log('main data',data);
-    
+    })        
     
     const handleError = (type:string,error:any):void =>{
         console.log(error)
@@ -86,8 +84,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         }
         else{
             setData({...data,managerStatus:false})
-        }
-        
+        }   
     }
 
     const validation = ():boolean =>{
@@ -139,7 +136,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             NokName:data.NokName,
             NokPhoneNo:data.NokPhoneNo,
             Email:data.Email,
-            Status:props.user === 'Manager' ? managerStatus:adminStatus
+            Status:props.manager ? managerStatus:adminStatus
         }
         if(updateAuthetication){
             props.setChange({...props.change,ProviderEdit:false,isSpinner:true})
@@ -152,33 +149,17 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     for(let i=0;i<data.deleteFiles.length;i++){
                         await sp.web.getFileByServerRelativePath(data.deleteFiles[i].ServerRelativeUrl).delete()
                         .then(res=>console.log('del response',res))
-                        .catch(error=>console.log(error))
+                        .catch(error=>handleError('attachement delete',error))
                     }
 
                     for(let j=0;j<data.updateFiles.length;j++){
                         await sp.web.getFolderByServerRelativePath(results[0].ServerRelativeUrl)
                         .files.addUsingPath(data.updateFiles[j].name,data.updateFiles[j], { Overwrite: true })
                         .then(result=>console.log('data updated succesfully'))
-                        .catch(error=>console.log(error))
+                        .catch(error=>handleError('attachment update',error))
                     }
-                    
-                    
-                    // await sp.web.getFolderByServerRelativePath(results[0].ServerRelativeUrl).files.get()
-                    // .then( async (res)=>{
-                    //     console.log('res',res)
-                    //     // for(let i=0;i<data.deleteFiles.length;i++){
-                    //     //     console.log('url',data.deleteFiles[i].ServerRelativeUrl);
-                            
-                    //     //     await sp.web.getFolderByServerRelativePath(data.deleteFiles[i].ServerRelativeUrl).files.get()
-                    //     //     .then(res=>console.log('del res',res))
-                    //     //     .catch(error=>console.log(error))
-                    //     // }
-                    // })
-                    // .catch(error=>console.log(error))
-                    // // console.log('update folder result',results);
-                    
                 })
-                .catch(error=>console.log(error))
+                .catch(error=>handleError('get attachment folder',error))
                 props.setChange({...props.change,ProviderEdit:false,isSpinner:false})
             })
             .catch(error=>{
@@ -194,14 +175,10 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         .then(async (data)=>{
             if(data){
                 await sp.web.rootFolder.folders.getByName("ProviderAttachment").folders.select('*,Id').filter('Name eq ' + "'" + data.Id + "'").get()
-                .then( async (result)=>{
-                    console.log('results',result);
-                    
+                .then( async (result)=>{                    
                          setFolderName(result[0].Name)
                          await sp.web.getFolderByServerRelativePath(result[0].ServerRelativeUrl).files.get()
-                         .then((result)=>{
-                             console.log('data',data.ProviderName);
-                             
+                         .then((result)=>{                             
                              setData({
                                 Name:data.ProviderName ? data.ProviderName:'',
                                 PhoneNo:data.PhoneNo ? data.PhoneNo:null,
@@ -217,10 +194,8 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                                 deleteFiles:[]
                              })
                          })
-                         .catch((error)=>console.log(error))
-                     }).catch((error)=>{
-                         console.log('error',error);
-                     })
+                         .catch((error)=>handleError('get attachement',error))
+                     }).catch((error)=>{handleError('edit get ',error);})
             }
         })
         .catch(error=>handleError('provider edit get',error))
@@ -260,14 +235,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
        setData({...data,updateFiles:updatedfiles})
      
     }
-
-    // const getData = async () =>{
-    //     await sp.web.lists.getByTitle('ProviderAttachment').items.select('*').expand('File').get().then((data)=>{
-    //         console.log('attachment data',data);
-    //     }).catch((error)=>{
-    //         console.log('error',error);
-    //     })
-    // }
 
     useEffect(()=>{
         if(props.formView.authentication){
@@ -311,11 +278,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         </div>
                     </div>
                     <div className={styles.dropDown}>
-                        { props.user==="Admin" && !isViewAuthentication ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
+                        { props.admin && !isViewAuthentication ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
                     </div>
                     {!isViewAuthentication ?
                         (
-                            props.user === 'Manager' ? 
+                            props.manager ? 
                                 (
                                     <div className={styles.approvedStatus}>
                                         <Checkbox label='Approved' name='Approved'checked={data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
@@ -327,7 +294,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         )
                         : 
                         <TextField value={data.status} styles={text} label='Status' disabled={isViewAuthentication}/>
-                        
                     }
                     <div>
                         {
@@ -337,18 +303,19 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                                     return (
                                         <div key={index}>
                                             <a href={value.ServerRelativeUrl+'? web=1'}>{value.Name}</a>
-                                            {props.user === 'Admin'  && !isViewAuthentication &&  <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(value,index)}/>}
+                                            {props.admin  && !isViewAuthentication &&  <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(value,index)}/>}
                                         </div>
                                     )
                                 })
                             )
                             :
-                            (isViewAuthentication &&
+                            (
+                                isViewAuthentication &&
                                 <TextField value={'no attachement added'} styles={text} label='Attachments' disabled={isViewAuthentication}/>
                             )
                         }
                     </div>
-                    {props.user === 'Admin' && !isViewAuthentication && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
+                    {props.admin && !isViewAuthentication && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
                     <div>
                         {  
                             data.updateFiles.length ? 
@@ -357,11 +324,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                                         return (
                                             <div key={index}>
                                                 <a href='#'>{value.name}</a>
-                                                {
-                                                    props.user === 'Admin' ? 
-                                                    <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleUpdateFileClose(value,index)}/>
-                                                    :null
-                                                }
+                                                {props.admin && <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleUpdateFileClose(value,index)}/>    }
                                             </div>
                                         )
                                     })
@@ -373,12 +336,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
-                            {
-                                !isViewAuthentication ?
-                                <DefaultButton text='Update' onClick={()=>handleUpdate()}/>
-                                :
-                                null
-                            }
+                            {!isViewAuthentication && <DefaultButton text='Update' onClick={()=>handleUpdate()}/>}
                         </div>
                     </div>
                 </div>
