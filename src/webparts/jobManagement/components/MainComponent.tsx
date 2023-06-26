@@ -18,6 +18,7 @@ interface IFormView{
     status:string;
 }
 const MainCoimponent=(props:any)=>{
+
     const circle={
         root:{
             ".ms-Spinner-circle":{
@@ -27,6 +28,7 @@ const MainCoimponent=(props:any)=>{
             }
         }
     }
+
     const currentUser= props.context._pageContext._user.email;
     
     const [admin,setAdmin ] =useState<boolean>(false);
@@ -40,6 +42,7 @@ const MainCoimponent=(props:any)=>{
         contructor:false,
         isSpinner:false,
     })
+
     const [formView,setFormView]=React.useState<IFormView>({
         authentication:false,
         Id:null,
@@ -58,7 +61,6 @@ const MainCoimponent=(props:any)=>{
         })
         .catch(error=>handleError('get group Admin',error))
     }
-
 
     const getManagers = async () =>{
         await sp.web.siteGroups.getByName('Manager').users.get()

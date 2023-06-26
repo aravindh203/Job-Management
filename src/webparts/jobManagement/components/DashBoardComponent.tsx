@@ -139,21 +139,26 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }) 
     const [pageFilter,setPageFilter]=React.useState<IData[]>([])
     const[search,setSearch]=React.useState<string>('')
+
+
+
     const findUserAccess=(item:any)=>{
         
         let isEdit = true;
-        if(props.admin && props.manager && item.Status=="Draft" && item.CreatedBy==props.currentUser){
-            isEdit = false
-        }
-        else if(props.admin && item.Status=="Draft" && item.CreatedBy==props.currentUser){
+        if( item.Status=="Draft" && item.CreatedBy==props.currentUser){
             isEdit = false
         }
         else if(props.manager && item.Status!=='Draft'){
             isEdit = false
         }
+        else if(props.admin && item.Status === 'Rejected'){
+            isEdit = false
+        }
     
         return isEdit
     }
+
+    
     const getData=async()=>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
             
@@ -286,7 +291,6 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     </div>
                     {
                         addFormViewFlag ? <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />:null
-
                     }
                 </div>
             </div>
