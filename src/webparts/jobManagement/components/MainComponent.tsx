@@ -29,10 +29,7 @@ const MainCoimponent=(props:any)=>{
     }
     const currentUser= props.context._pageContext._user.email;
     
-    console.log('currentUser',currentUser);
-    
     const [user,setUser] =useState<string>('')
-    console.log('user',user);
     
     const [dbAuthentication,setDbAuthentication] = useState<boolean>(true)
     const [componentChange,setComponentChange]=React.useState<IComponentChange>({
@@ -114,7 +111,7 @@ const MainCoimponent=(props:any)=>{
                 dbAuthentication ?  <DashBoardComponent currentUser={currentUser} user={user} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/>:null
             }  
             {
-                componentChange.provider ? <ProviderForm change={componentChange} setChange={setComponentChange}/>:null
+                componentChange.provider ? <ProviderForm change={componentChange} setChange={setComponentChange} formView={formView}/>:null
             }      
             {
                 componentChange.ProviderEdit ? <ProviderEditForm  currentUser={currentUser} user={user} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null

@@ -52,6 +52,8 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         updateFiles:[],
         deleteFiles:[]
     })    
+    console.log('main data',data);
+    
     
     const handleError = (type:string,error:any):void =>{
         console.log(error)
@@ -193,9 +195,12 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             if(data){
                 await sp.web.rootFolder.folders.getByName("ProviderAttachment").folders.select('*,Id').filter('Name eq ' + "'" + data.Id + "'").get()
                 .then( async (result)=>{
+                    console.log('results',result);
+                    
                          setFolderName(result[0].Name)
                          await sp.web.getFolderByServerRelativePath(result[0].ServerRelativeUrl).files.get()
                          .then((result)=>{
+                             console.log('data',data.ProviderName);
                              
                              setData({
                                 Name:data.ProviderName ? data.ProviderName:'',
@@ -306,9 +311,9 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         </div>
                     </div>
                     <div className={styles.dropDown}>
-                        { props.user==="Admin" && data.status === 'Draft' ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
+                        { props.user==="Admin" && !isViewAuthentication ? <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>:null}
                     </div>
-                    {props.formView.status!=='view' ?
+                    {!isViewAuthentication ?
                         (
                             props.user === 'Manager' ? 
                                 (
@@ -328,25 +333,27 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         {
                             data.files.length ? 
                             (
-                                data.files.map((value,index)=>{
+                                data.files.map((value:any,index:number)=>{
                                     return (
                                         <div key={index}>
                                             <a href={value.ServerRelativeUrl+'? web=1'}>{value.Name}</a>
-                                            {props.user === 'Admin'  &&  <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(value,index)}/>}
+                                            {props.user === 'Admin'  && !isViewAuthentication &&  <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(value,index)}/>}
                                         </div>
                                     )
                                 })
                             )
                             :
-                            null
+                            (isViewAuthentication &&
+                                <TextField value={'no attachement added'} styles={text} label='Attachments' disabled={isViewAuthentication}/>
+                            )
                         }
                     </div>
-                    {props.user === 'Admin' && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
+                    {props.user === 'Admin' && !isViewAuthentication && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
                     <div>
                         {  
                             data.updateFiles.length ? 
                                 (
-                                    data.updateFiles.map((value,index)=>{
+                                    data.updateFiles.map((value:any,index:number)=>{
                                         return (
                                             <div key={index}>
                                                 <a href='#'>{value.name}</a>
@@ -367,9 +374,9 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
                             {
-                            props.formView.status!=='view' ?
+                                !isViewAuthentication ?
                                 <DefaultButton text='Update' onClick={()=>handleUpdate()}/>
-                            :
+                                :
                                 null
                             }
                         </div>
