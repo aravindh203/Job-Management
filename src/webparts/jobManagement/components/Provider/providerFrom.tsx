@@ -18,6 +18,7 @@ interface IProviderAdd{
 }
 
 const ProviderAddForm = (props:any):JSX.Element =>{
+    
     const text={
         root:{
             ".ms-TextField-fieldGroup":{
@@ -37,7 +38,8 @@ const ProviderAddForm = (props:any):JSX.Element =>{
         NokPhoneNo:null,
         Files:[]
     })    
-
+    // console.log("files0",data.Files);
+    
     const handleInputValue = (event:any):void =>{
         if(event.target.name==='Provider Name'){
             setData({...data,Name:event.target.value})
@@ -67,7 +69,19 @@ const ProviderAddForm = (props:any):JSX.Element =>{
             setData({...data,NokPhoneNo:event.target.value})
         }
     }
-
+    const fileUpload=(datas)=>{
+        let filesData=[];
+        for(let i=0;i<datas.length;i++){
+            filesData.push(datas[i])
+        } 
+        
+        setData({...data,Files:filesData})
+    }
+    const handleFileClose=(index)=>{
+        let deletedDoc=[...data.Files]
+        deletedDoc.splice(index,1)
+        setData({...data,Files:deletedDoc})
+    }
     const validation = (btnVal:string):boolean =>{
                // return false;
 
@@ -133,7 +147,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
                 props.setChange({...props.change,provider:false,isSpinner:false})
             })
             .catch(error=>{
-                console.log('add error',error);
+                errorFunction('add error',error);
                 props.setChange({...props.change,provider:true,isSpinner:false})
             })
         }
@@ -150,22 +164,24 @@ const ProviderAddForm = (props:any):JSX.Element =>{
                 sp.web.getFolderByServerRelativePath(result.data.ServerRelativeUrl).files.addUsingPath(data.Files[i].name, data.Files[i], { Overwrite: true })
                 //await result.folder.files.add(data.Files[i].name, data.Files[i])
                 .then(async (file) => {
-                    await console.log('File created successfully:', file);
+                    await errorFunction('File created successfully:', file);
                 })
                 .catch(async (error) => {
-                    await console.log('Error creating file:', error);
+                    await errorFunction('Error creating file:', error);
                 });
             }
             
         })
         .catch(error => {
-            console.log('Error creating folder:', error);
+            errorFunction('Error creating folder:', error);
         });
 
     }
-
+    const errorFunction=(name,error)=>{
+        console.log(error,name);
+        
+    }
     
-
     return(
         <div className={styles.contain}>
             <div className={styles.formContainer}>
@@ -210,11 +226,22 @@ const ProviderAddForm = (props:any):JSX.Element =>{
                         :
                         null
                     }
-                    <input name='file' type='file' onChange={(event)=>handleInputValue(event)} multiple />
+                    <div>
+                        {data.Files.length ? data.Files.map((value,index)=>{
+                            return (
+                                <div key={index}>
+                                    <a href='#'>{value.name} </a>
+                                    <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(index)}/> 
+                                </div>
+                            )
+                        }):null}
+                    </div>
+                    <input name='file' type='file' onChange={(event)=>{handleInputValue(event),fileUpload(event.target.files)}} multiple />
+
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
-                            <DefaultButton text='Add' onClick={()=>handleSubmit('Add')}/>
+                            <DefaultButton text='Submit' onClick={()=>handleSubmit('Add')}/>
                             <DefaultButton text='Draft' onClick={()=>handleSubmit('Draft')}/>
                         </div>
                     </div>
