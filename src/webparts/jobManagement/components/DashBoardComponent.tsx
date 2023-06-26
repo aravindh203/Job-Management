@@ -117,18 +117,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         onRender:(item)=>{
             let userAuthentication= findUserAccess(item)
            
-            // var managerAuthentication = item.Status === 'Draft' ? true:false;            
-            // var adminAuthentication =  item.Status === 'Pending' || item.Status === 'Approved' || item.Status === 'Approved' || item.Status === 'Not Approved' ? true:false;
             
-            // if(props.user==='Admin'){                
-            //     return <IconButton iconProps={{ iconName: 'edit' }} disabled={adminAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
-            // }
-            // else if(props.user==='Manager'){
-            //     return <IconButton iconProps={{ iconName: 'edit' }} disabled={managerAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
-            // }
-            // else{
-            //     return <IconButton iconProps={{ iconName: 'edit' }} disabled={true} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
-            // }
            return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
         }
     },{
@@ -150,16 +139,16 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }) 
     const [pageFilter,setPageFilter]=React.useState<IData[]>([])
     const[search,setSearch]=React.useState<string>('')
-    const [isEdit,setIsEdit]=React.useState<boolean>(false)
-    const findUserAccess=(item)=>{
-        console.log("item",item);
+    const findUserAccess=(item:any)=>{
         
         let isEdit = true;
-        if(props.admin && props.manager){
+        if(props.admin && props.manager && item.Status=="Draft" && item.CreatedBy==props.currentUser){
             isEdit = false
-        }else if(props.admin && item.Status=="Draft" && item.CreatedBy==props.currentUser){
+        }
+        else if(props.admin && item.Status=="Draft" && item.CreatedBy==props.currentUser){
             isEdit = false
-        }else if(props.manager && item.Status==="Pending"){
+        }
+        else if(props.manager && item.Status!=='Draft'){
             isEdit = false
         }
     
@@ -169,9 +158,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
             
             let masterData:IData[]=[]
-            data.forEach((item)=>{
-                console.log('itemthft',item);
-                
+            data.forEach((item)=>{                
                 masterData.push({
                     Id:item.Id ? item.Id:null,
                     ProviderName:item.ProviderName ? item.ProviderName:'',
@@ -211,14 +198,11 @@ const DashBoardComponent=(props:any):JSX.Element=>{
 
 
         var searchdata=[]
-        if(filterData1.length){
-            console.log('hello');
-            
+        if(filterData1.length){            
             searchdata=[...filterData1].filter((value)=>{
                 return value.ProviderName.toLowerCase().startsWith(search.trimStart())
             })
         }
-        console.log('searchdata',searchdata);
         setPageFilter([...searchdata])
         setFilterData([...searchdata]) 
         
@@ -251,7 +235,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
     }
     const errorFunction=(error:any,name:string)=>{
-        console.log("error",error,name);
+        console.log(name,error,);
     }
     React.useEffect(()=>{
         dropFilter()
