@@ -140,7 +140,6 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }]
 
     let addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
-    const [pageRender,setPageRender] = useState<string>('Provider')
     const [MData,setMData] = useState<IData[]>([])
     const [filter,setFilter] = useState<string>('All')
     const [filterData,setFilterData] = useState<IData[]>([]) 
@@ -169,7 +168,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
     
     const getProviderData=async()=>{
-        await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
+        await sp.web.lists.getByTitle(props.list.listName).items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{
        
             if(data.length){ 
                 let masterData:IData[]=[]
@@ -198,7 +197,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
 
     const getClientData=async()=>{
-        await sp.web.lists.getByTitle("Client").items.select('id,ClientName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
+        await sp.web.lists.getByTitle(props.list.listName).items.select('id,ClientName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{
        
         if(data.length){
             let masterData:IData[]=[]
@@ -255,19 +254,21 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
 
     const handlePageChange = () =>{
-        if(pageRender==='Provider'){
-            props.setChange({...props.change,provider:true,client:false})
-        }else if(pageRender==='Client'){
-            props.setChange({...props.change,client:true,provider:false})
+        if(props.pageRender==='Provider'){
+            props.setChange({...props.change,provider:true})
+        }
+        else if(props.pageRender==='Client'){
+            props.setChange({...props.change,client:true})
         }
     }
 
     const editHandle=(item:IData)=>{
         props.setFormView({authentication:true,Id:item.Id,status:'edit'})
 
-        if(pageRender==='Provider'){
+        if(props.pageRender==='Provider'){
             props.setChange({...props.change,ProviderEdit:true})
-        }else if(pageRender==='Client'){
+        }
+        else if(props.pageRender==='Client'){
             props.setChange({...props.change,clientEdit:true})
         }
     }
@@ -275,9 +276,10 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     const viewHandle=(item:IData)=>{
         props.setFormView({authentication:true,Id:item.Id,status:'view'})
 
-        if(pageRender==='Provider'){
+        if(props.pageRender==='Provider'){
             props.setChange({...props.change,ProviderEdit:true})
-        }else if(pageRender==='Client'){
+        }
+        else if(props.pageRender==='Client'){
             props.setChange({...props.change,clientEdit:true})
         }
     }
@@ -304,31 +306,32 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     },[pagination,pageFilter])
 
     useEffect(()=>{
-        if(pageRender==='Provider'){
+        if(props.pageRender==='Provider'){
             getProviderData()
-        }else if(pageRender==='Client'){
+        }
+        else if(props.pageRender==='Client'){
             getClientData()
         }     
-    },[pageRender])
+    },[props.list])
     
     return(
         <div>
             <div>
-                <Pivot>
-                    <PivotItem headerText="Provider" 
+                <Pivot selectedKey={props.pageRender}>
+                    <PivotItem headerText="Provider" itemKey={'Provider'}
                         onRenderItemLink={(item)=>{
                             return <div onClick={()=>{
-                                setPageRender(item.headerText)
+                                props.setPageRender(item.headerText)
                             }}>Provider</div>
                         }}/>
-                    <PivotItem headerText="Client" onRenderItemLink={(item)=>{
+                    <PivotItem headerText="Client" itemKey={'Client'} onRenderItemLink={(item)=>{
                             return <div onClick={()=>{
-                                setPageRender(item.headerText)
+                                props.setPageRender(item.headerText)
                             }}>Client</div>
-                        }}/>
-                    <PivotItem headerText="Contructor" onRenderItemLink={(item)=>{
+                        }}/> 
+                    <PivotItem headerText="Contructor" itemKey={'Contructor'} onRenderItemLink={(item)=>{
                             return <div onClick={()=>{
-                                setPageRender(item.headerText)
+                                props.setPageRender(item.headerText)
                             }}>Contructor</div>
                         }}/>
                 </Pivot>

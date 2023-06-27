@@ -88,9 +88,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     }
 
     const validation = (type:string):boolean =>{
-        
-        console.log('type',type);
-        
+                
         let isAllValueFilled=true;
         let emailvalidation=/^([A-Za-z0-9_.])+\@([g][m][a][i][l])+\.([c][o][m])+$/;
         let isDraft = (type === 'Draft' || type === 'Rejected') ? true:false;
@@ -128,7 +126,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
  
     const handleUpdate = async (type:string) =>{
         var updateAuthetication = validation(type);
-        console.log('updateAuthetication',updateAuthetication);
         
         let newJson={
             ProviderName:data.Name, 
@@ -142,10 +139,10 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         }
         if(updateAuthetication){
             props.setChange({...props.change,ProviderEdit:false,isSpinner:true})
-            await sp.web.lists.getByTitle('ProviderList').items.getById(props.formView.Id).update(newJson)
+            await sp.web.lists.getByTitle(props.list.listName).items.getById(props.formView.Id).update(newJson)
             .then( async (result)=>{
                 
-                await sp.web.rootFolder.folders.getByName("ProviderAttachment").folders.filter('Name eq ' + "'" + folderName + "'").get()
+                await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.filter('Name eq ' + "'" + folderName + "'").get()
                 .then(async (results)=>{
                     
                     for(let i=0;i<data.deleteFiles.length;i++){
@@ -172,7 +169,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     }
 
     const handleBtnAuthendication = (result) =>{
-        console.log('authendication result',result.Status);
         
         if(!isViewAuthentication){
             if(result.Status==='Draft'){
@@ -198,13 +194,12 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     }
 
     const getData = async () =>{
-        await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
+        await sp.web.lists.getByTitle(props.list.listName).items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
         .then(async (data)=>{
             handleBtnAuthendication(data)
             if(data){
-                await sp.web.rootFolder.folders.getByName("ProviderAttachment").folders.select('*,Id').filter('Name eq ' + "'" + data.Id + "'").get()
+                await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.select('*,Id').filter('Name eq ' + "'" + data.Id + "'").get()
                 .then( async (result)=>{ 
-                    console.log('check result',result);
                                        
                          setFolderName(result[0].Name)
                          await sp.web.getFolderByServerRelativePath(result[0].ServerRelativeUrl).files.get()

@@ -38,7 +38,6 @@ const ClientForm = (props:any):JSX.Element =>{
         NokPhoneNo:null,
         Files:[]
     })    
-    // console.log("files0",data.Files);
     
     const handleInputValue = (event:any):void =>{
         if(event.target.name==='Client Name'){
@@ -141,7 +140,7 @@ const ClientForm = (props:any):JSX.Element =>{
         }
         if(submitAuthetication){
             props.setChange({...props.change,client:false,isSpinner:true})
-            await sp.web.lists.getByTitle('Client').items.add(newJson)
+            await sp.web.lists.getByTitle(props.list.listName).items.add(newJson)
             .then((result)=>{                                
                 createFolder(result.data.Id);
                 props.setChange({...props.change,client:false,isSpinner:false})
@@ -156,7 +155,7 @@ const ClientForm = (props:any):JSX.Element =>{
     async function createFolder(ItemID)
     {
         //await sp.web.lists.getByTitle('ProviderAttachment').rootFolder.folders.add(ItemID)
-        await sp.web.rootFolder.folders.getByName("ClientAttachment").folders.addUsingPath(ItemID.toString(),true)
+        await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.addUsingPath(ItemID.toString(),true)
         .then(async (result)=> 
         {
             // Create a file inside the newly created folder

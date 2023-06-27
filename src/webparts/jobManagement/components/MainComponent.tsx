@@ -33,7 +33,8 @@ const MainCoimponent=(props:any)=>{
     }
 
     const currentUser= props.context._pageContext._user.email;
-    
+
+    const [pageRender,setPageRender] = useState<string>('Provider')       
     const [admin,setAdmin ] =useState<boolean>(false);
     const [manager,setManager]=useState<boolean>(false)
     const [Visitors,setVisitor]=useState<boolean>(false)    
@@ -46,7 +47,10 @@ const MainCoimponent=(props:any)=>{
         contructor:false,
         isSpinner:false,
     })
-
+    const [list,setList] = useState({
+        listName:'ProviderList',
+        libraryName:'ProviderAttachment'
+    }) 
     const [formView,setFormView]=React.useState<IFormView>({
         authentication:false,
         Id:null,
@@ -100,17 +104,30 @@ const MainCoimponent=(props:any)=>{
         setDbAuthentication(dbauthentic)
         
     },[componentChange])
+
+    useEffect(()=>{
+        if(pageRender === 'Provider'){
+            setList({listName:'ProviderList',libraryName:'ProviderAttachment'})
+        }
+        else if(pageRender === 'Client'){
+            setList({listName:'Client',libraryName:'ClientAttachment'})
+        }
+        else if(pageRender === 'Contructor'){
+            setList({listName:'Contructor',libraryName:'ContructorAttachment'})
+        }
+        
+    },[pageRender])
     return(
         <>
-            { dbAuthentication &&  <DashBoardComponent currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/> }  
+            { dbAuthentication &&  <DashBoardComponent list={list} pageRender={pageRender} setPageRender={setPageRender} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/> }  
 
-            { componentChange.provider && <ProviderForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
+            { componentChange.provider && <ProviderForm list={list} change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
 
-            { componentChange.ProviderEdit && <ProviderEditForm  currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
+            { componentChange.ProviderEdit && <ProviderEditForm  list={list} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
 
-            { componentChange.client && <ClientForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
+            { componentChange.client && <ClientForm list={list} change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
 
-            { componentChange.clientEdit && <ClientEditForm  currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
+            { componentChange.clientEdit && <ClientEditForm list={list} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
 
             { componentChange.isSpinner && <Spinner styles={circle}/> }
 
