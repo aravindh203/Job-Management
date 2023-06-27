@@ -115,9 +115,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         minWidth:100,
         maxWidth:150,
         onRender:(item)=>{
-            let userAuthentication= findUserAccess(item)
-           
-            
+            let userAuthentication= findUserAccess(item)  
            return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
         }
     },{
@@ -128,6 +126,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         maxWidth:150,
         onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewHandle(item)}}/>)
     }]
+
     let addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
     const [pageRender,setPageRender]=React.useState<string>('Provider')
     const [MData,setMData]=React.useState<IData[]>([])
@@ -139,29 +138,26 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }) 
     const [pageFilter,setPageFilter]=React.useState<IData[]>([])
     const[search,setSearch]=React.useState<string>('')
-
-
-
+    
     const findUserAccess=(item:any)=>{
-        
+
         let isEdit = true;
-        if( item.Status=="Draft" && item.CreatedBy==props.currentUser){
+        if( props.admin &&  (item.Status=="Draft" || item.Status=="Rejected") && item.CreatedBy==props.currentUser){
             isEdit = false
         }
-        else if(props.manager && item.Status!=='Draft'){
+        else if(props.manager && item.Status!=='Draft' && item.Status!=='Rejected' ){
             isEdit = false
         }
         else if(props.admin && item.Status === 'Rejected'){
             isEdit = false
         }
-    
         return isEdit
     }
-
     
-    const getData=async()=>{
+    const getProviderData=async()=>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
-            
+       
+            if(data.length){ 
             let masterData:IData[]=[]
             data.forEach((item)=>{                
                 masterData.push({
@@ -180,8 +176,38 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             setMData(masterData);
             setFilterData(masterData);
             setPageFilter(masterData)
+        }   
         }).catch((error)=>{
-            errorFunction(error,"getData")
+            errorFunction(error,"get provider Data")
+        })
+    }
+    const getClientData=async()=>{
+        await sp.web.lists.getByTitle("Client").items.select('id,ClientName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
+            console.log("data",data);
+       
+        if(data.length){
+            let masterData:IData[]=[]
+            data.forEach((item)=>{                
+                masterData.push({
+                    Id:item.Id ? item.Id:null,
+                    ProviderName:item.ClientName ? item.ClientName:'',
+                    PhoneNo:item.PhoneNo ? item.PhoneNo:null,
+                    ContactAdd:item.ContactAddress ? item.ContactAddress:'',
+                    SecondaryAdd:item.SecondAddress ? item.SecondAddress:'',
+                    NokName:item.NokName ? item.NokName:'',
+                    NokPhoneNo:item.NokPhoneNo ? item.NokPhoneNo:null,
+                    Email:item.Email ? item.Email:'',
+                    Status:item.Status ? item.Status:'',
+                    CreatedBy:item.Author.EMail ? item.Author.EMail:''
+                })
+            })
+            setMData(masterData);
+            setFilterData(masterData);
+            setPageFilter(masterData)
+        } 
+        
+        }).catch((error)=>{
+            errorFunction(error,"get client Data")
         })
     }
     const dropFilter=()=>{
@@ -201,8 +227,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             }
         })  
 
-
-        var searchdata=[]
+        let searchdata=[]
         if(filterData1.length){            
             searchdata=[...filterData1].filter((value)=>{
                 return value.ProviderName.toLowerCase().startsWith(search.trimStart())
@@ -214,7 +239,9 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
     const handlePageChange = () =>{
         if(pageRender==='Provider'){
-            props.setChange({...props.change,provider:true})
+            props.setChange({...props.change,provider:true,client:false})
+        }else if(pageRender==='Client'){
+            props.setChange({...props.change,client:true,provider:false})
         }
     }
     const editHandle=(item:IData)=>{
@@ -249,8 +276,12 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         getPagination()
     },[pagination,pageFilter])
     React.useEffect(()=>{
-        getData()  
-    },[])
+        if(pageRender==='Provider'){
+            getProviderData()
+        }else if(pageRender==='Client'){
+            getClientData()
+        }     
+    },[pageRender])
     
     return(
         <div>
@@ -285,7 +316,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                         />
                     </div>
                 </div>
-                <div>
+                <div className={styles.searchBox}>
                     <div>
                         <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)} disableAnimation/>
                     </div>

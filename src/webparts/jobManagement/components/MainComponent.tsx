@@ -5,10 +5,11 @@ import DashBoardComponent from './DashBoardComponent';
 import ProviderForm from './Provider/providerFrom';
 import ProviderEditForm from './Provider/ProviderEditForm';
 import { Spinner, SpinnerSize } from '@fluentui/react';
+import ClientForm from './Client/ClientForm';
 interface IComponentChange{
     provider:boolean;
     ProviderEdit:boolean;
-    clinet:boolean;
+    client:boolean;
     contructor:boolean;
     isSpinner:boolean;
 }
@@ -38,7 +39,7 @@ const MainCoimponent=(props:any)=>{
     const [componentChange,setComponentChange]=React.useState<IComponentChange>({
         provider:false,
         ProviderEdit:false,
-        clinet:false,
+        client:false,
         contructor:false,
         isSpinner:false,
     })
@@ -107,6 +108,9 @@ const MainCoimponent=(props:any)=>{
             {
                 componentChange.ProviderEdit ? <ProviderEditForm  currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null
             }
+            {
+                componentChange.client ? <ClientForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/>:null
+            } 
             {
                 componentChange.isSpinner ? <Spinner styles={circle} />:null
             }
