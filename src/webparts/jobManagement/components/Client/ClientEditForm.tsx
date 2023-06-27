@@ -22,6 +22,8 @@ interface IProviderAdd{
 const ClientEditForm = (props:any):JSX.Element =>{
 
     const isViewAuthentication = props.formView.status === 'view' ? true:false
+    const isInputView = props.admin && !isViewAuthentication 
+
     const text={
         root:{
             ".ms-TextField-fieldGroup":{
@@ -88,9 +90,7 @@ const ClientEditForm = (props:any):JSX.Element =>{
     }
 
     const validation = (type):boolean =>{
-        
-        console.log('type',type);
-        
+                
         let isAllValueFilled=true;
         let emailvalidation=/^([A-Za-z0-9_.])+\@([g][m][a][i][l])+\.([c][o][m])+$/;
         let isDraft = (type === 'Draft' || type === 'Rejected') ? true:false;
@@ -128,7 +128,6 @@ const ClientEditForm = (props:any):JSX.Element =>{
  
     const handleUpdate = async (type:string) =>{
         var updateAuthetication = validation(type);
-        console.log('updateAuthetication',updateAuthetication);
         
         let newJson={
             ClientName:data.Name, 
@@ -142,10 +141,10 @@ const ClientEditForm = (props:any):JSX.Element =>{
         }
         if(updateAuthetication){
             props.setChange({...props.change,clientEdit:false,isSpinner:true})
-            await sp.web.lists.getByTitle('Client').items.getById(props.formView.Id).update(newJson)
+            await sp.web.lists.getByTitle(props.list.listName).items.getById(props.formView.Id).update(newJson)
             .then( async (result)=>{
                 
-                await sp.web.rootFolder.folders.getByName("ClientAttachment").folders.filter('Name eq ' + "'" + folderName + "'").get()
+                await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.filter('Name eq ' + "'" + folderName + "'").get()
                 .then(async (results)=>{
                     
                     for(let i=0;i<data.deleteFiles.length;i++){
@@ -172,7 +171,6 @@ const ClientEditForm = (props:any):JSX.Element =>{
     }
 
     const handleBtnAuthendication = (result) =>{
-        console.log('authendication result',result.Status);
         
         if(!isViewAuthentication){
             if(result.Status==='Draft'){
@@ -198,13 +196,12 @@ const ClientEditForm = (props:any):JSX.Element =>{
     }
 
     const getData = async () =>{
-        await sp.web.lists.getByTitle("Client").items.select('id,ClientName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
+        await sp.web.lists.getByTitle(props.list.listName).items.select('id,ClientName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
         .then(async (data)=>{
             handleBtnAuthendication(data)
             if(data){
-                await sp.web.rootFolder.folders.getByName("ClientAttachment").folders.select('*,Id').filter('Name eq ' + "'" + data.Id + "'").get()
+                await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.select('*,Id').filter('Name eq ' + "'" + data.Id + "'").get()
                 .then( async (result)=>{ 
-                    console.log('check result',result);
                                        
                          setFolderName(result[0].Name)
                          await sp.web.getFolderByServerRelativePath(result[0].ServerRelativeUrl).files.get()
@@ -305,9 +302,7 @@ const ClientEditForm = (props:any):JSX.Element =>{
                             <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
-                    <div className={styles.dropDown}>
-                        { props.admin && !isViewAuthentication && data.status === 'Draft' && <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>}
-                    </div>
+
                         {isViewAuthentication && <TextField value={data.status} styles={text} label='Status' disabled={isViewAuthentication}/>}
                     <div>
                         {
@@ -329,7 +324,7 @@ const ClientEditForm = (props:any):JSX.Element =>{
                             )
                         }
                     </div>
-                    {props.admin && !isViewAuthentication && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
+                    {isInputView && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
                     <div>
                         {  
                             data.updateFiles.length ? 
