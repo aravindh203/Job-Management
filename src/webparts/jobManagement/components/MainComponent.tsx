@@ -28,8 +28,8 @@ const MainCoimponent=(props:any)=>{
     const circle={
         root:{
             ".ms-Spinner-circle":{
-                width:"100px",
-                height:"100px",
+                width:"50px",
+                height:"50px",
                 borderWidth:"5px"
             }
         }

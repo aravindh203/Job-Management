@@ -127,7 +127,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         maxWidth:150,
         onRender:(item)=>{
             let userAuthentication= findUserAccess(item)  
-           return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
+           return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{viewEditHnadle(item,'edit')}}/>
         }
     },
     {
@@ -136,7 +136,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         name:'View',
         minWidth:100,
         maxWidth:150,
-        onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewHandle(item)}}/>)
+        onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewEditHnadle(item,'view')}}/>)
     }]
 
     let addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
@@ -157,10 +157,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         if( props.admin &&  (item.Status=="Draft" || item.Status=="Rejected") && item.CreatedBy==props.currentUser){
             isEdit = false
         }
-        else if(props.manager && item.Status!=='Draft' && item.Status!=='Rejected' ){
-            isEdit = false
-        }
-        else if(props.admin && item.Status === 'Rejected'){
+        else if(props.manager && item.Status!=='Draft' && item.Status!=='Rejected' && item.Status!=="Approve" ){
             isEdit = false
         }
 
@@ -286,33 +283,22 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
         else if(props.pageRender==='Client'){
             props.setChange({...props.change,client:true})
-        }else if(props.pageRender==='Contructor'){
+        }
+        else if(props.pageRender==='Contructor'){
             props.setChange({...props.change,contructor:true})
         }
     }
 
-    const editHandle=(item:IData)=>{
-        props.setFormView({authentication:true,Id:item.Id,status:'edit'})
+    const viewEditHnadle = (item:IData,clickStatus:string)=>{
+        props.setFormView({authentication:true,Id:item.Id,status:clickStatus})
 
         if(props.pageRender==='Provider'){
             props.setChange({...props.change,ProviderEdit:true})
         }
         else if(props.pageRender==='Client'){
             props.setChange({...props.change,clientEdit:true})
-        } else if(props.pageRender==='Contructor'){
-            props.setChange({...props.change,conturctorEdit:true})
-        }
-    }
-
-    const viewHandle=(item:IData)=>{
-        props.setFormView({authentication:true,Id:item.Id,status:'view'})
-
-        if(props.pageRender==='Provider'){
-            props.setChange({...props.change,ProviderEdit:true})
-        }
-        else if(props.pageRender==='Client'){
-            props.setChange({...props.change,clientEdit:true})
-        }else if(props.pageRender==='Contructor'){
+        } 
+        else if(props.pageRender==='Contructor'){
             props.setChange({...props.change,conturctorEdit:true})
         }
     }

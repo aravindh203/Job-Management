@@ -177,7 +177,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             else if(result.Status==='Rejected'){
                 setBtnAuthendication({...btnAuthntication,isSubmitBtn:true})
             }
-            else if(result.Status==='Approved' || result.Status==='Pending' || result.Status==='Re Submitted'){
+            else if(result.Status==='Pending' || result.Status==='Re Submitted'){
                 setBtnAuthendication({...btnAuthntication,isApprove:true,isRejected:true})
             }
         }
