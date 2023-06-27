@@ -14,7 +14,6 @@ interface IProviderAdd{
     NokName:string;
     NokPhoneNo:number;
     status:string;
-    managerStatus:boolean;
     files:any,
     updateFiles:any,
     deleteFiles:any
@@ -37,7 +36,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
 
     const [error,setError] = useState<string>('')
     const [folderName,setFolderName] =useState<string>('')
-    
     const [data,setData] = useState<IProviderAdd>({
         Name:'',
         PhoneNo:null,
@@ -47,11 +45,18 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         status:'',
         NokName:'',
         NokPhoneNo:null,
-        managerStatus:true,
         files:[],
         updateFiles:[],
         deleteFiles:[]
-    })        
+    })   
+    const [btnAuthntication,setBtnAuthendication] = useState({
+        isAddBtn:false,
+        isDraftBtn:false,
+        isUpdateBtn:false,
+        isSubmitBtn:false,
+        isApprove:false,
+        isRejected:false
+    })    
     
     const handleError = (type:string,error:any):void =>{
         console.log(error)
@@ -76,44 +81,41 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         else if(event.target.name==='Nok Name'){
             setData({...data,NokName:event.target.value})
         }
-        else if(event.target.name==='Nok Phone No'){
+        else{
             setData({...data,NokPhoneNo:event.target.value})
         }
-        else if(event.target.name==='Approved'){
-            setData({...data,managerStatus:true})
-        }
-        else{
-            setData({...data,managerStatus:false})
-        }   
+        
     }
 
-    const validation = ():boolean =>{
+    const validation = (type):boolean =>{
+        
+        console.log('type',type);
         
         let isAllValueFilled=true;
         let emailvalidation=/^([A-Za-z0-9_.])+\@([g][m][a][i][l])+\.([c][o][m])+$/;
-        let addBtn = data.status === 'Add' ? true:false;
+        let isDraft = (type === 'Draft' || type === 'Rejected') ? true:false;
 
         if(!data.Name){
             setError('please fill name')
             isAllValueFilled = false;
         }
-        else if((addBtn && !(data.PhoneNo && data.PhoneNo.toString().length===10)) ||  (data.PhoneNo && data.PhoneNo.toString().length!==10)){
+        else if((!isDraft && !(data.PhoneNo && data.PhoneNo.toString().length===10)) ||  (data.PhoneNo && data.PhoneNo.toString().length!==10)){
             setError('please enter a valid phone number')
             isAllValueFilled = false;
         }
-        else if((addBtn && !(data.Email && emailvalidation.test(data.Email))) || (data.Email && !emailvalidation.test(data.Email))){
+        else if((!isDraft && !(data.Email && emailvalidation.test(data.Email))) || (data.Email && !emailvalidation.test(data.Email))){
             setError('please enter a valid email')
             isAllValueFilled = false;
         }
-        else if((addBtn && !data.FirstAddress) && true){
+        else if((!isDraft && !data.FirstAddress) && true){
             setError('please enter a address')
             isAllValueFilled = false;
         }
-        else if((addBtn && !data.NokName) && true){
+        else if((!isDraft && !data.NokName) && true){
             setError('please enter a Nok Name')
             isAllValueFilled = false;
         }
-        else if((addBtn && !(data.NokPhoneNo && data.NokPhoneNo.toString().length==10)) || (data.NokPhoneNo && data.NokPhoneNo.toString().length!==10)){
+        else if((!isDraft && !(data.NokPhoneNo && data.NokPhoneNo.toString().length==10)) || (data.NokPhoneNo && data.NokPhoneNo.toString().length!==10)){
             setError('please enter Nok mobile number')
             isAllValueFilled = false;
         }
@@ -124,19 +126,19 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         return isAllValueFilled;
     }
  
-    const handleUpdate = async () =>{
-        var updateAuthetication = validation();
-        var managerStatus=data.managerStatus ? 'Approved':'Rejected'
-        var adminStatus=data.status === 'Draft' ? data.status:'Pending'
+    const handleUpdate = async (type:string) =>{
+        var updateAuthetication = validation(type);
+        console.log('updateAuthetication',updateAuthetication);
+        
         let newJson={
-            ProviderName:data.Name,
+            ProviderName:data.Name, 
             PhoneNo:data.PhoneNo,
             ContactAdd:data.FirstAddress,
             SecondaryAdd:data.SecondAddress,
             NokName:data.NokName,
             NokPhoneNo:data.NokPhoneNo,
             Email:data.Email,
-            Status:props.manager ? managerStatus:adminStatus
+            Status:type
         }
         if(updateAuthetication){
             props.setChange({...props.change,ProviderEdit:false,isSpinner:true})
@@ -166,33 +168,52 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                 handleError('provider update',error)
                 props.setChange({...props.change,ProviderEdit:true,isSpinner:false})
             })
-            
+        }
+    }
+
+    const handleBtnAuthendication = (result) =>{
+        console.log('authendication result',result.Status);
+        
+        if(result.Status==='Draft'){
+            setBtnAuthendication({...btnAuthntication,isAddBtn:true,isDraftBtn:true})
+        }
+        else if(result.Status==='Rejected'){
+            setBtnAuthendication({...btnAuthntication,isSubmitBtn:true})
+        }
+        else if(result.Status==='Approved' || result.Status==='Pending' || result.Status==='Re Submitted'){
+            setBtnAuthendication({...btnAuthntication,isApprove:true,isRejected:true})
+        }
+        else{
+            setBtnAuthendication({...btnAuthntication,isAddBtn:true})
         }
     }
 
     const getData = async () =>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
         .then(async (data)=>{
+            handleBtnAuthendication(data)
             if(data){
                 await sp.web.rootFolder.folders.getByName("ProviderAttachment").folders.select('*,Id').filter('Name eq ' + "'" + data.Id + "'").get()
-                .then( async (result)=>{                    
+                .then( async (result)=>{ 
+                    console.log('check result',result);
+                                       
                          setFolderName(result[0].Name)
                          await sp.web.getFolderByServerRelativePath(result[0].ServerRelativeUrl).files.get()
                          .then((result)=>{                             
-                             setData({
-                                Name:data.ProviderName ? data.ProviderName:'',
-                                PhoneNo:data.PhoneNo ? data.PhoneNo:null,
-                                Email:data.Email ? data.Email:'',
-                                FirstAddress:data.ContactAdd ? data.ContactAdd:'',
-                                SecondAddress:data.SecondaryAdd ? data.SecondaryAdd:'',
-                                status:data.Status ? data.Status:'',
-                                NokName:data.NokName ? data.NokName:'',
-                                NokPhoneNo:data.NokPhoneNo ? data.NokPhoneNo:null,
-                                managerStatus:data.Status === 'Approved' ? true:false,
-                                files:result.length ? result:[],
-                                updateFiles:[],
-                                deleteFiles:[]
-                             })
+                            setData({
+                               Name:data.ProviderName ? data.ProviderName:'',
+                               PhoneNo:data.PhoneNo ? data.PhoneNo:null,
+                               Email:data.Email ? data.Email:'',
+                               FirstAddress:data.ContactAdd ? data.ContactAdd:'',
+                               SecondAddress:data.SecondaryAdd ? data.SecondaryAdd:'',
+                               status:data.Status ? data.Status:'',
+                               NokName:data.NokName ? data.NokName:'',
+                               NokPhoneNo:data.NokPhoneNo ? data.NokPhoneNo:null,
+                               files:result.length ? result:[],
+                               updateFiles:[],
+                               deleteFiles:[]
+                            })
+                            
                          })
                          .catch((error)=>handleError('get attachement',error))
                      }).catch((error)=>{handleError('edit get ',error);})
@@ -211,14 +232,14 @@ const ProviderEditForm = (props:any):JSX.Element =>{
 
     }
 
-    const handleUpdateFileClose = (value,index) =>{
+    const handleUpdateFileClose = (value:any,index:number) =>{
         var newUpdateFiles = [...data.updateFiles];
         newUpdateFiles.splice(index,1)
 
         setData({...data,updateFiles:newUpdateFiles})
     }
 
-    const handleUpdateFile = (event) =>{
+    const handleUpdateFile = (event:any) =>{
 
         var updatedfiles=[]
         for(let i=0;i<event.target.files.length;i++){
@@ -228,7 +249,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             if(!existAuthendication){
                 updatedfiles.push(event.target.files[i])
             }
-
         }
 
        setData({...data,updateFiles:updatedfiles})
@@ -279,21 +299,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     <div className={styles.dropDown}>
                         { props.admin && !isViewAuthentication && data.status === 'Draft' && <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>}
                     </div>
-                    {!isViewAuthentication ?
-                        (
-                            props.manager && data.status !== 'Draft' ? 
-                                (
-                                    <div className={styles.approvedStatus}>
-                                        <Checkbox label='Approved' name='Approved'checked={data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
-                                        <Checkbox label='Rejected' name='Not Approved' checked={!data.managerStatus}  onChange={(event)=>handleInputValue(event)}  />
-                                    </div>
-                                )
-                                :
-                                null
-                        )
-                        : 
-                        <TextField value={data.status} styles={text} label='Status' disabled={isViewAuthentication}/>
-                    }
+                        {isViewAuthentication && <TextField value={data.status} styles={text} label='Status' disabled={isViewAuthentication}/>}
                     <div>
                         {
                             data.files.length ? 
@@ -335,7 +341,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
                         <div className={styles.formBtn}>
-                            {!isViewAuthentication && <DefaultButton text='Update' onClick={()=>handleUpdate()}/>}
+                            {btnAuthntication.isApprove && <DefaultButton text='Approve' onClick={()=>handleUpdate('Approve')}/>}
+                            {btnAuthntication.isRejected && <DefaultButton text='Rejected' onClick={()=>handleUpdate('Rejected')}/>}
+                            {btnAuthntication.isSubmitBtn && <DefaultButton text='ReSubmit' onClick={()=>handleUpdate('Re Submitted')}/>}
+                            {btnAuthntication.isAddBtn && <DefaultButton text='Submit' onClick={()=>handleUpdate('Pending')}/>}
+                            {btnAuthntication.isDraftBtn && <DefaultButton text='Draft' onClick={()=>handleUpdate('Draft')}/>}
                         </div>
                     </div>
                 </div>
