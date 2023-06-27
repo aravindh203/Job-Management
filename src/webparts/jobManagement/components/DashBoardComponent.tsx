@@ -68,7 +68,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     const col:IColumn[]=[{
         key:'1',
         fieldName:'ProviderName',
-        name:'ProviderName',
+        name:'Name',
         minWidth:100,
         maxWidth:150
     },
@@ -169,9 +169,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     
     const getProviderData=async()=>{
         await sp.web.lists.getByTitle(props.list.listName).items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{
-       
+            let masterData:IData[]=[]
             if(data.length){ 
-                let masterData:IData[]=[]
                 data.forEach((item)=>{                
                     masterData.push({
                         Id:item.Id ? item.Id:null,
@@ -186,10 +185,12 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                         CreatedBy:item.Author.EMail ? item.Author.EMail:''
                     })
                 })
-                setMData(masterData);
-                setFilterData(masterData);
+                
                 setPageFilter(masterData)
-            }   
+            } 
+            setMData(masterData);
+            setFilterData(masterData);
+            setPageFilter(masterData)  
         })
         .catch((error)=>{
             errorFunction(error,"get provider Data")
@@ -198,9 +199,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
 
     const getClientData=async()=>{
         await sp.web.lists.getByTitle(props.list.listName).items.select('id,ClientName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{
-       
-        if(data.length){
             let masterData:IData[]=[]
+        if(data.length){
             data.forEach((item)=>{                
                 masterData.push({
                     Id:item.Id ? item.Id:null,
@@ -215,13 +215,40 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     CreatedBy:item.Author.EMail ? item.Author.EMail:''
                 })
             })
-            setMData(masterData);
-            setFilterData(masterData);
-            setPageFilter(masterData)
         } 
-        
+        setMData(masterData);
+        setFilterData(masterData);
+        setPageFilter(masterData)
         }).catch((error)=>{
             errorFunction(error,"get client Data")
+        })
+    }
+    const getContructorData=async()=>{
+        await sp.web.lists.getByTitle(props.list.listName).items.select('id,ContrctName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{
+            console.log('list name',props.list.listName);
+            console.log('data',data);
+            let masterData:IData[]=[]
+        if(data.length){
+            data.forEach((item)=>{                
+                masterData.push({
+                    Id:item.Id ? item.Id:null,
+                    ProviderName:item.ContrctName ? item.ContrctName:'',
+                    PhoneNo:item.PhoneNo ? item.PhoneNo:null,
+                    ContactAdd:item.ContactAddress ? item.ContactAddress:'',
+                    SecondaryAdd:item.SecondAddress ? item.SecondAddress:'',
+                    NokName:item.NokName ? item.NokName:'',
+                    NokPhoneNo:item.NokPhoneNo ? item.NokPhoneNo:null,
+                    Email:item.Email ? item.Email:'',
+                    Status:item.Status ? item.Status:'',
+                    CreatedBy:item.Author.EMail ? item.Author.EMail:''
+                })
+            })
+        } 
+        setMData(masterData);
+        setFilterData(masterData);
+        setPageFilter(masterData)
+        }).catch((error)=>{
+            errorFunction(error,"get contructor Data")
         })
     }
 
@@ -259,6 +286,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
         else if(props.pageRender==='Client'){
             props.setChange({...props.change,client:true})
+        }else if(props.pageRender==='Contructor'){
+            props.setChange({...props.change,contructor:true})
         }
     }
 
@@ -270,6 +299,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
         else if(props.pageRender==='Client'){
             props.setChange({...props.change,clientEdit:true})
+        } else if(props.pageRender==='Contructor'){
+            props.setChange({...props.change,conturctorEdit:true})
         }
     }
 
@@ -281,6 +312,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
         else if(props.pageRender==='Client'){
             props.setChange({...props.change,clientEdit:true})
+        }else if(props.pageRender==='Contructor'){
+            props.setChange({...props.change,conturctorEdit:true})
         }
     }
 
@@ -311,6 +344,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
         else if(props.pageRender==='Client'){
             getClientData()
+        }else if(props.pageRender==='Contructor'){
+            getContructorData()
         }     
     },[props.list])
     
