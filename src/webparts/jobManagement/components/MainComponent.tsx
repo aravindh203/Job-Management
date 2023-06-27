@@ -6,10 +6,12 @@ import ProviderForm from './Provider/providerFrom';
 import ProviderEditForm from './Provider/ProviderEditForm';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import ClientForm from './Client/ClientForm';
+import ClientEditForm from './Client/ClientEditForm';
 interface IComponentChange{
     provider:boolean;
     ProviderEdit:boolean;
     client:boolean;
+    clientEdit:boolean;
     contructor:boolean;
     isSpinner:boolean;
 }
@@ -40,6 +42,7 @@ const MainCoimponent=(props:any)=>{
         provider:false,
         ProviderEdit:false,
         client:false,
+        clientEdit:false,
         contructor:false,
         isSpinner:false,
     })
@@ -106,6 +109,8 @@ const MainCoimponent=(props:any)=>{
             { componentChange.ProviderEdit && <ProviderEditForm  currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
 
             { componentChange.client && <ClientForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
+
+            { componentChange.clientEdit && <ClientEditForm  currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
 
             { componentChange.isSpinner && <Spinner styles={circle}/> }
 

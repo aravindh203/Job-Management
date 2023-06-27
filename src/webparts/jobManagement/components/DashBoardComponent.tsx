@@ -267,6 +267,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
 
         if(pageRender==='Provider'){
             props.setChange({...props.change,ProviderEdit:true})
+        }else if(pageRender==='Client'){
+            props.setChange({...props.change,clientEdit:true})
         }
     }
 
@@ -275,6 +277,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
 
         if(pageRender==='Provider'){
             props.setChange({...props.change,ProviderEdit:true})
+        }else if(pageRender==='Client'){
+            props.setChange({...props.change,clientEdit:true})
         }
     }
 
