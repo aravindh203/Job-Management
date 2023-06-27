@@ -7,12 +7,15 @@ import ProviderEditForm from './Provider/ProviderEditForm';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import ClientForm from './Client/ClientForm';
 import ClientEditForm from './Client/ClientEditForm';
+import ContructorForm from './Contructor/ContructorForm';
+import ContructorEditForm from './Contructor/ContructorEditForm';
 interface IComponentChange{
     provider:boolean;
     ProviderEdit:boolean;
     client:boolean;
     clientEdit:boolean;
     contructor:boolean;
+    conturctorEdit:boolean;
     isSpinner:boolean;
 }
 interface IFormView{
@@ -45,12 +48,16 @@ const MainCoimponent=(props:any)=>{
         client:false,
         clientEdit:false,
         contructor:false,
+        conturctorEdit:false,
         isSpinner:false,
     })
+    console.log('componentChange',componentChange);
     const [list,setList] = useState({
         listName:'ProviderList',
         libraryName:'ProviderAttachment'
     }) 
+    console.log('list',list);
+    
     const [formView,setFormView]=React.useState<IFormView>({
         authentication:false,
         Id:null,
@@ -106,6 +113,7 @@ const MainCoimponent=(props:any)=>{
     },[componentChange])
 
     useEffect(()=>{
+
         if(pageRender === 'Provider'){
             setList({listName:'ProviderList',libraryName:'ProviderAttachment'})
         }
@@ -117,6 +125,7 @@ const MainCoimponent=(props:any)=>{
         }
         
     },[pageRender])
+
     return(
         <>
             { dbAuthentication &&  <DashBoardComponent list={list} pageRender={pageRender} setPageRender={setPageRender} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/> }  
@@ -128,6 +137,10 @@ const MainCoimponent=(props:any)=>{
             { componentChange.client && <ClientForm list={list} change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
 
             { componentChange.clientEdit && <ClientEditForm list={list} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
+
+            { componentChange.contructor && <ContructorForm list={list} change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
+
+            { componentChange.conturctorEdit && <ContructorEditForm list={list} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
 
             { componentChange.isSpinner && <Spinner styles={circle}/> }
 
