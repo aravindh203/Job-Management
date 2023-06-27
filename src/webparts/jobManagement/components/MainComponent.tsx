@@ -99,21 +99,15 @@ const MainCoimponent=(props:any)=>{
     },[componentChange])
     return(
         <>
-            {
-                dbAuthentication ?  <DashBoardComponent currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/>:null
-            }  
-            {
-                componentChange.provider ? <ProviderForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/>:null
-            }      
-            {
-                componentChange.ProviderEdit ? <ProviderEditForm  currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/>:null
-            }
-            {
-                componentChange.client ? <ClientForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/>:null
-            } 
-            {
-                componentChange.isSpinner ? <Spinner styles={circle} />:null
-            }
+            { dbAuthentication &&  <DashBoardComponent currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} setFormView={setFormView}/> }  
+
+            { componentChange.provider && <ProviderForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
+
+            { componentChange.ProviderEdit && <ProviderEditForm  currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
+
+            { componentChange.client && <ClientForm change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
+
+            { componentChange.isSpinner && <Spinner styles={circle}/> }
 
         </>
      )
