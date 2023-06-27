@@ -177,7 +177,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
         });
 
     }
-    const errorFunction=(name,error)=>{
+    const errorFunction=(name:string,error:any)=>{
         console.log(error,name);
         
     }
