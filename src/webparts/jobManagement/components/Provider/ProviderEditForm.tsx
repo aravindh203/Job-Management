@@ -22,6 +22,7 @@ interface IProviderAdd{
 const ProviderEditForm = (props:any):JSX.Element =>{
 
     const isViewAuthentication = props.formView.status === 'view' ? true:false
+    const isInputView = props.admin && !isViewAuthentication 
     const text={
         root:{
             ".ms-TextField-fieldGroup":{
@@ -84,10 +85,9 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         else{
             setData({...data,NokPhoneNo:event.target.value})
         }
-        
     }
 
-    const validation = (type):boolean =>{
+    const validation = (type:string):boolean =>{
         
         console.log('type',type);
         
@@ -174,17 +174,26 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     const handleBtnAuthendication = (result) =>{
         console.log('authendication result',result.Status);
         
-        if(result.Status==='Draft'){
-            setBtnAuthendication({...btnAuthntication,isAddBtn:true,isDraftBtn:true})
-        }
-        else if(result.Status==='Rejected'){
-            setBtnAuthendication({...btnAuthntication,isSubmitBtn:true})
-        }
-        else if(result.Status==='Approved' || result.Status==='Pending' || result.Status==='Re Submitted'){
-            setBtnAuthendication({...btnAuthntication,isApprove:true,isRejected:true})
+        if(!isViewAuthentication){
+            if(result.Status==='Draft'){
+                setBtnAuthendication({...btnAuthntication,isAddBtn:true,isDraftBtn:true})
+            }
+            else if(result.Status==='Rejected'){
+                setBtnAuthendication({...btnAuthntication,isSubmitBtn:true})
+            }
+            else if(result.Status==='Approved' || result.Status==='Pending' || result.Status==='Re Submitted'){
+                setBtnAuthendication({...btnAuthntication,isApprove:true,isRejected:true})
+            }
         }
         else{
-            setBtnAuthendication({...btnAuthntication,isAddBtn:true})
+            setBtnAuthendication({
+                isAddBtn:false,
+                isDraftBtn:false,
+                isUpdateBtn:false,
+                isSubmitBtn:false,
+                isApprove:false,
+                isRejected:false
+            })
         }
     }
 
@@ -296,9 +305,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                             <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
-                    <div className={styles.dropDown}>
-                        { props.admin && !isViewAuthentication && data.status === 'Draft' && <Dropdown placeholder="Select options" label="Status" selectedKey={data.status} options={options} onChange={(event,item)=>setData({...data,status:item.text})}/>}
-                    </div>
                         {isViewAuthentication && <TextField value={data.status} styles={text} label='Status' disabled={isViewAuthentication}/>}
                     <div>
                         {
@@ -314,13 +320,10 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                                 })
                             )
                             :
-                            (
-                                isViewAuthentication &&
-                                <TextField value={'no attachement added'} styles={text} label='Attachments' disabled={isViewAuthentication}/>
-                            )
+                            (isViewAuthentication && <TextField value={'no attachement added'} styles={text} label='Attachments' disabled={isViewAuthentication}/>)
                         }
                     </div>
-                    {props.admin && !isViewAuthentication && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
+                    {isInputView && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
                     <div>
                         {  
                             data.updateFiles.length ? 

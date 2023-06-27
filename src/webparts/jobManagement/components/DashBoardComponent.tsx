@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect,useState } from 'react';
 import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption, Icon, SearchBox } from '@fluentui/react';
 import {Item, sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
@@ -50,35 +51,42 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     const option:IDropdownOption[]=[{
         key:'All',
         text:'All'
-    },{
+    },
+    {
         key:'Draft',
         text:'Draft'
-    },{
+    },
+    {
         key:'Pending',
         text:'Pending',   
-    },{
+    },
+    {
         key:'Approved',
         text:'Approved',   
     }]
+
     const col:IColumn[]=[{
         key:'1',
         fieldName:'ProviderName',
         name:'ProviderName',
         minWidth:100,
         maxWidth:150
-    },{
+    },
+    {
         key:'2',
         fieldName:'PhoneNo',
         name:'PhoneNo',
         minWidth:100,
         maxWidth:150
-    },{
+    },
+    {
         key:'3',
         fieldName:'ContactAdd',
         name:'ContactAdd',
         minWidth:100,
         maxWidth:150
-    },{
+    },
+    {
         key:'4',
         fieldName:'SecondaryAdd',
         name:'SecondaryAdd',
@@ -90,7 +98,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         name:'NokName',
         minWidth:100,
         maxWidth:150
-    },{
+    },
+    {
         key:'6',
         fieldName:'NokPhoneNo',
         name:'NokPhoneNo',
@@ -102,13 +111,15 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         name:'Email',
         minWidth:100,
         maxWidth:150
-    },{
+    },
+    {
         key:'8',
         fieldName:'Status',
         name:'Status',
         minWidth:100,
         maxWidth:150
-    },{
+    },
+    {
         key:'9',
         fieldName:'Edit',
         name:'Edit',
@@ -118,7 +129,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             let userAuthentication= findUserAccess(item)  
            return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{editHandle(item)}}/>
         }
-    },{
+    },
+    {
         key:'10',
         fieldName:'View',
         name:'View',
@@ -128,20 +140,21 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }]
 
     let addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
-    const [pageRender,setPageRender]=React.useState<string>('Provider')
-    const [MData,setMData]=React.useState<IData[]>([])
-    const [filter,setFilter]=React.useState<string>('All')
-    const [filterData,setFilterData]=React.useState<IData[]>([])
-    const [pagination,setPagination]=React.useState({
+    const [pageRender,setPageRender] = useState<string>('Provider')
+    const [MData,setMData] = useState<IData[]>([])
+    const [filter,setFilter] = useState<string>('All')
+    const [filterData,setFilterData] = useState<IData[]>([]) 
+    const [pageFilter,setPageFilter] = useState<IData[]>([])
+    const[search,setSearch] = useState<string>('')
+    const [pagination,setPagination] = useState({
         currentPage:1,
         displayItems:5,
-    }) 
-    const [pageFilter,setPageFilter]=React.useState<IData[]>([])
-    const[search,setSearch]=React.useState<string>('')
+    })
     
     const findUserAccess=(item:any)=>{
 
         let isEdit = true;
+
         if( props.admin &&  (item.Status=="Draft" || item.Status=="Rejected") && item.CreatedBy==props.currentUser){
             isEdit = false
         }
@@ -151,6 +164,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         else if(props.admin && item.Status === 'Rejected'){
             isEdit = false
         }
+
         return isEdit
     }
     
@@ -158,32 +172,33 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         await sp.web.lists.getByTitle("ProviderList").items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
        
             if(data.length){ 
-            let masterData:IData[]=[]
-            data.forEach((item)=>{                
-                masterData.push({
-                    Id:item.Id ? item.Id:null,
-                    ProviderName:item.ProviderName ? item.ProviderName:'',
-                    PhoneNo:item.PhoneNo ? item.PhoneNo:null,
-                    ContactAdd:item.ContactAdd ? item.ContactAdd:'',
-                    SecondaryAdd:item.SecondaryAdd ? item.SecondaryAdd:'',
-                    NokName:item.NokName ? item.NokName:'',
-                    NokPhoneNo:item.NokPhoneNo ? item.NokPhoneNo:null,
-                    Email:item.Email ? item.Email:'',
-                    Status:item.Status ? item.Status:'',
-                    CreatedBy:item.Author.EMail ? item.Author.EMail:''
+                let masterData:IData[]=[]
+                data.forEach((item)=>{                
+                    masterData.push({
+                        Id:item.Id ? item.Id:null,
+                        ProviderName:item.ProviderName ? item.ProviderName:'',
+                        PhoneNo:item.PhoneNo ? item.PhoneNo:null,
+                        ContactAdd:item.ContactAdd ? item.ContactAdd:'',
+                        SecondaryAdd:item.SecondaryAdd ? item.SecondaryAdd:'',
+                        NokName:item.NokName ? item.NokName:'',
+                        NokPhoneNo:item.NokPhoneNo ? item.NokPhoneNo:null,
+                        Email:item.Email ? item.Email:'',
+                        Status:item.Status ? item.Status:'',
+                        CreatedBy:item.Author.EMail ? item.Author.EMail:''
+                    })
                 })
-            })
-            setMData(masterData);
-            setFilterData(masterData);
-            setPageFilter(masterData)
-        }   
-        }).catch((error)=>{
+                setMData(masterData);
+                setFilterData(masterData);
+                setPageFilter(masterData)
+            }   
+        })
+        .catch((error)=>{
             errorFunction(error,"get provider Data")
         })
     }
+
     const getClientData=async()=>{
         await sp.web.lists.getByTitle("Client").items.select('id,ClientName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').expand("Author").get().then((data)=>{
-            console.log("data",data);
        
         if(data.length){
             let masterData:IData[]=[]
@@ -210,6 +225,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             errorFunction(error,"get client Data")
         })
     }
+
     const dropFilter=()=>{
         
         var filterData1:IData[] = [...MData].filter(value=>{
@@ -237,6 +253,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         setFilterData([...searchdata]) 
         
     }
+
     const handlePageChange = () =>{
         if(pageRender==='Provider'){
             props.setChange({...props.change,provider:true,client:false})
@@ -244,6 +261,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             props.setChange({...props.change,client:true,provider:false})
         }
     }
+
     const editHandle=(item:IData)=>{
         props.setFormView({authentication:true,Id:item.Id,status:'edit'})
 
@@ -251,6 +269,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             props.setChange({...props.change,ProviderEdit:true})
         }
     }
+
     const viewHandle=(item:IData)=>{
         props.setFormView({authentication:true,Id:item.Id,status:'view'})
 
@@ -258,6 +277,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             props.setChange({...props.change,ProviderEdit:true})
         }
     }
+
     const getPagination=()=>{
         if(pageFilter.length>0){
             let lastIndex=pagination.currentPage*pagination.displayItems
@@ -266,16 +286,20 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             setFilterData(displayData)    
         }
     }
+
     const errorFunction=(error:any,name:string)=>{
         console.log(name,error,);
     }
-    React.useEffect(()=>{
+
+    useEffect(()=>{
         dropFilter()
     },[filter,search])
-    React.useEffect(()=>{
+
+    useEffect(()=>{
         getPagination()
     },[pagination,pageFilter])
-    React.useEffect(()=>{
+
+    useEffect(()=>{
         if(pageRender==='Provider'){
             getProviderData()
         }else if(pageRender==='Client'){
@@ -336,7 +360,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 limiter={3} 
                 />
             </div>
-        </div>)}
+        </div>
+    )}
             
 
 export default DashBoardComponent;
