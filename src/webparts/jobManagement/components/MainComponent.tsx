@@ -9,6 +9,7 @@ import ClientForm from './Client/ClientForm';
 import ClientEditForm from './Client/ClientEditForm';
 import ContructorForm from './Contructor/ContructorForm';
 import ContructorEditForm from './Contructor/ContructorEditForm';
+import ErrorComponent from './ErrorComponent';
 interface IComponentChange{
     provider:boolean;
     ProviderEdit:boolean;
@@ -16,6 +17,7 @@ interface IComponentChange{
     clientEdit:boolean;
     contructor:boolean;
     conturctorEdit:boolean;
+    isError:boolean;
     isSpinner:boolean;
 }
 
@@ -60,12 +62,14 @@ const MainCoimponent=(props:any)=>{
         clientEdit:false,
         contructor:false,
         conturctorEdit:false,
+        isError:false,
         isSpinner:false,
     })
     
 
     const handleError = (type:string,error:any):void =>{
         console.log(type,error)
+        setComponentChange({...componentChange,isError:true})
     }
    
     const getVisitors= async () =>{
@@ -76,7 +80,9 @@ const MainCoimponent=(props:any)=>{
 
             setVisitor(isVisitorAuthentication)
         })
-        .catch(error=>handleError('get group Admin',error))
+        .catch(error=>{
+            handleError('get group Admin',error)    
+        })
 
     }
 
@@ -89,7 +95,9 @@ const MainCoimponent=(props:any)=>{
             setManager(ismanagerAuthentication)
             getVisitors()
         })
-        .catch(error=>handleError('get group manager',error))
+        .catch(error=>{
+            handleError('get group manager',error)
+        })
 
     }
 
@@ -102,7 +110,9 @@ const MainCoimponent=(props:any)=>{
             setAdmin(isAdminAuthentication)
             getManagers()
         })
-        .catch(error=>handleError('get group Admin',error))
+        .catch(error=>{
+            handleError('get group Admin',error)
+        })
 
     }
     
@@ -154,6 +164,7 @@ const MainCoimponent=(props:any)=>{
 
             { componentChange.isSpinner && <Spinner styles={circle}/> }
 
+            {componentChange.isError && <ErrorComponent />}
         </>
      )
 }

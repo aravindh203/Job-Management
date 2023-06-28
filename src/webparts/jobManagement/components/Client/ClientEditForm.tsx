@@ -59,6 +59,7 @@ const ClientEditForm = (props:any):JSX.Element =>{
     
     const handleError = (type:string,error:any):void =>{
         console.log(error)
+        props.setChange({...props.change,isError:true})
     }
 
     const handleInputValue = (key:string,value:any):void =>{
@@ -82,7 +83,10 @@ const ClientEditForm = (props:any):JSX.Element =>{
            let index = [...phoneNum].findIndex(value=>value===number);
            phoneNum.splice(index,1)
            setPhoneNum([...phoneNum])
-        }).catch((error)=>handleError("getPhonoNo",error))
+        }).catch((error)=>{
+            handleError("getPhonoNo",error)
+           
+        })
 
     }
 

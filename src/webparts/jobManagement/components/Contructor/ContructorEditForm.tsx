@@ -59,6 +59,7 @@ const ContructorEditForm = (props:any):JSX.Element =>{
     
     const handleError = (type:string,error:any):void =>{
         console.log(error)
+        props.setChange({...props.change,isError:true})
     }
 
     const handleInputValue = (key:string,value:any):void =>{

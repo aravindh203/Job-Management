@@ -186,6 +186,7 @@ const ContructorForm = (props:any):JSX.Element =>{
 
     const errorFunction=(name,error)=>{
         console.log(error,name);
+        props.setChange({...props.change,isError:true})
     }
 
     useEffect(()=>{
