@@ -51,13 +51,11 @@ const MainCoimponent=(props:any)=>{
         conturctorEdit:false,
         isSpinner:false,
     })
-    console.log('componentChange',componentChange);
     const [list,setList] = useState({
         listName:'ProviderList',
         libraryName:'ProviderAttachment'
     }) 
-    console.log('list',list);
-    
+   
     const [formView,setFormView]=React.useState<IFormView>({
         authentication:false,
         Id:null,

@@ -7,7 +7,7 @@ import styles from './../Provider/providerForm.module.scss';
 
 interface IProviderAdd{
     Name:string;
-    PhoneNo:number;
+    PhoneNo:string;
     Email:string;
     FirstAddress:string;
     SecondAddress:string;
@@ -27,9 +27,10 @@ const ContructorForm = (props:any):JSX.Element =>{
         }
     }
     const [error,setError] = useState<string>('')
+    const [phoneNum,setPhoneNum]=useState([])    
     const [data,setData] = useState<IProviderAdd>({
         Name:'',
-        PhoneNo:null,
+        PhoneNo:"",
         Email:'',
         FirstAddress:'',
         SecondAddress:'',
@@ -39,34 +40,37 @@ const ContructorForm = (props:any):JSX.Element =>{
         Files:[]
     })    
     
-    const handleInputValue = (event:any):void =>{
-        if(event.target.name==='Contructor Name'){
-            setData({...data,Name:event.target.value})
-        }
-        else if(event.target.name==='Phone No'){
-            setData({...data,PhoneNo:event.target.value})
-        }
-        else if(event.target.name==='Email'){
-            setData({...data,Email:event.target.value})
-        }
-        else if(event.target.name==='Contact Address'){ 
-            setData({...data,FirstAddress:event.target.value})
-        }
-        else if(event.target.name==='Second Address'){
-            setData({...data,SecondAddress:event.target.value})
-        }
-        else if(event.target.name==='Nok'){
-            setData({...data,Nok:event.target.checked})
-        }
-        else if(event.target.name==='Nok Name'){
-            setData({...data,NokName:event.target.value})
-        }
-        else if(event.target.name==='file'){
-            setData({...data,Files:event.target.files})
-        }
-        else{
-            setData({...data,NokPhoneNo:event.target.value})
-        }
+    const handleInputValue = (key:string,value:any):void =>{
+        let Data={...data}
+        Data[key]=value
+        setData(Data)
+        // if(event.target.name==='Contructor Name'){
+        //     setData({...data,Name:event.target.value})
+        // }
+        // else if(event.target.name==='Phone No'){
+        //     setData({...data,PhoneNo:event.target.value})
+        // }
+        // else if(event.target.name==='Email'){
+        //     setData({...data,Email:event.target.value})
+        // }
+        // else if(event.target.name==='Contact Address'){ 
+        //     setData({...data,FirstAddress:event.target.value})
+        // }
+        // else if(event.target.name==='Second Address'){
+        //     setData({...data,SecondAddress:event.target.value})
+        // }
+        // else if(event.target.name==='Nok'){
+        //     setData({...data,Nok:event.target.checked})
+        // }
+        // else if(event.target.name==='Nok Name'){
+        //     setData({...data,NokName:event.target.value})
+        // }
+        // else if(event.target.name==='file'){
+        //     setData({...data,Files:event.target.files})
+        // }
+        // else{
+        //     setData({...data,NokPhoneNo:event.target.value})
+        // }
     }
     const fileUpload=(datas)=>{
         let filesData=[];
@@ -81,35 +85,55 @@ const ContructorForm = (props:any):JSX.Element =>{
         deletedDoc.splice(index,1)
         setData({...data,Files:deletedDoc})
     }
+    const getPhoneNovalidation=async()=>{
+        await sp.web.lists.getByTitle(props.list.listName).items.select("PhoneNo").get().then((item)=>{
+            
+           let phoneNum=[];
+           item.forEach((value)=>{
+                let mobileNumber = value.PhoneNo ? value.PhoneNo:''
+                phoneNum.push(mobileNumber)
+           })
+           setPhoneNum([...phoneNum])
+        }).catch((error)=>errorFunction(error,"getPhonoNo"))
+    }
     const validation = (btnVal:string):boolean =>{
                // return false;
-
+        let phoneNoValidation=[...phoneNum].every(value=>{            
+            return value !== data.PhoneNo
+        })
+        console.log("phoneNoValidation",phoneNoValidation);
+        
         let isAllValueFilled=true;
         let emailvalidation=/^([A-Za-z0-9_.])+\@([g][m][a][i][l])+\.([c][o][m])+$/;
         let addBtn = btnVal === 'Add' ? true:false;
+        console.log('addBtn',addBtn);
 
         if(!data.Name){
             setError('please fill name')
             isAllValueFilled = false;
         }
-        else if((addBtn && !(data.PhoneNo && data.PhoneNo.toString().length===10)) ||  (data.PhoneNo && data.PhoneNo.toString().length!==10)){
-            setError('please enter a valid phone number')
+        else if(addBtn && !data.PhoneNo){
+            setError('please enter a  phone number')
+            isAllValueFilled = false;
+        }
+        else if((addBtn && data.PhoneNo && !phoneNoValidation) || (!addBtn && data.PhoneNo && !phoneNoValidation)){
+            setError('phone number already exist')
             isAllValueFilled = false;
         }
         else if((addBtn && !(data.Email && emailvalidation.test(data.Email))) || (data.Email && !emailvalidation.test(data.Email))){
             setError('please enter a valid email')
             isAllValueFilled = false;
         }
-        else if((addBtn && !data.FirstAddress) && true){
+        else if((addBtn && !data.FirstAddress)){
             setError('please enter a address')
             isAllValueFilled = false;
         }
         else if(data.Nok){
-            if((addBtn && !data.NokName) && true){
+            if((addBtn && !data.NokName)){
                 setError('please enter a Nok Name')
                 isAllValueFilled = false;
             }
-            else if((addBtn && !(data.NokPhoneNo && data.NokPhoneNo.toString().length==10)) || (data.NokPhoneNo && data.NokPhoneNo.toString().length!==10)){
+            else if(addBtn && !data.NokPhoneNo){
                 setError('please enter Nok mobile number')
                 isAllValueFilled = false;
             }
@@ -127,7 +151,8 @@ const ContructorForm = (props:any):JSX.Element =>{
  
     const handleSubmit = async (btnVal:string) =>{
         var submitAuthetication = validation(btnVal);
-    
+        console.log('bjkgbj',btnVal);
+        
         let newJson={
             ContrctName:data.Name,
             PhoneNo:data.PhoneNo,
@@ -180,7 +205,9 @@ const ContructorForm = (props:any):JSX.Element =>{
         console.log(error,name);
         
     }
-    
+    useEffect(()=>{
+        getPhoneNovalidation()
+    },[])
     return(
         <div className={styles.contain}>
             <div className={styles.formContainer}>
@@ -191,34 +218,34 @@ const ContructorForm = (props:any):JSX.Element =>{
                 <div className={styles.formContent}>
                     <div className={styles.inputAlign}>
                         <div>
-                            <TextField value={data.Name} label='Contructor Name' styles={text} name='Contructor Name' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                            <TextField value={data.Name} label='Contructor Name' styles={text} name='Contructor Name' onChange={(event,text)=>handleInputValue("Name",text)} disabled={false}/>
                         </div>
                         <div>
-                            <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} label='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                            <TextField value={data.PhoneNo} styles={text} label='Phone No' name='Phone No' maxLength={10} onChange={(event,text)=>handleInputValue("PhoneNo",text)} disabled={false}/>
                         </div>
                     </div>
                     <div>
-                        <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                        <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event,text)=>handleInputValue("Email",text)} disabled={false}/>
                     </div>
                     <div className={styles.inputAlign}>
                         <div>
-                            <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                            <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event,text)=>handleInputValue("FirstAddress",text)} disabled={false}/>
                         </div>
                         <div>
-                            <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                            <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event,text)=>handleInputValue("SecondAddress",text)} disabled={false}/>
                         </div>
                     </div>
                     <div>
-                        <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event)=>handleInputValue(event)} disabled={false} />
+                        <Checkbox checked={data.Nok} label='Nok' name='Nok' onChange={(event,text)=>handleInputValue("Nok",text)} disabled={false} />
                     </div>
                     {
                         data.Nok ? 
                         (<div className={styles.inputAlign}>
                             <div>
-                                <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                                <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event,text)=>handleInputValue("NokName",text)} disabled={false}/>
                             </div>
                             <div>
-                                <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={false}/>
+                                <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event,text)=>handleInputValue("NokPhoneNo",text)} disabled={false}/>
                             </div>
                         </div>
                         )
@@ -235,7 +262,7 @@ const ContructorForm = (props:any):JSX.Element =>{
                             )
                         }):null}
                     </div>
-                    <input name='file' type='file' onChange={(event)=>{handleInputValue(event),fileUpload(event.target.files)}} multiple />
+                    <input name='file' type='file' onChange={(event)=>{fileUpload(event.target.files)}} multiple />
 
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>

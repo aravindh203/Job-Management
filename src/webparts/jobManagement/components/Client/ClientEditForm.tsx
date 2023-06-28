@@ -7,7 +7,7 @@ import styles from './../Provider/providerForm.module.scss';
 
 interface IProviderAdd{
     Name:string;
-    PhoneNo:number;
+    PhoneNo:string;
     Email:string;
     FirstAddress:string;
     SecondAddress:string;
@@ -37,10 +37,11 @@ const ClientEditForm = (props:any):JSX.Element =>{
     ]
 
     const [error,setError] = useState<string>('')
+    const [phoneNum,setPhoneNum]=useState([])    
     const [folderName,setFolderName] =useState<string>('')
     const [data,setData] = useState<IProviderAdd>({
         Name:'',
-        PhoneNo:null,
+        PhoneNo:"",
         Email:'',
         FirstAddress:'',
         SecondAddress:'',
@@ -64,58 +65,81 @@ const ClientEditForm = (props:any):JSX.Element =>{
         console.log(error)
     }
 
-    const handleInputValue = (event:any):void =>{
-        if(event.target.name==='Client Name'){
-            setData({...data,Name:event.target.value})
-        }
-        else if(event.target.name==='Phone No'){
-            setData({...data,PhoneNo:event.target.value})
-        }
-        else if(event.target.name==='Email'){
-            setData({...data,Email:event.target.value})
-        }
-        else if(event.target.name==='Contact Address'){ 
-            setData({...data,FirstAddress:event.target.value})
-        }
-        else if(event.target.name==='Second Address'){
-            setData({...data,SecondAddress:event.target.value})
-        }
-        else if(event.target.name==='Nok Name'){
-            setData({...data,NokName:event.target.value})
-        }
-        else{
-            setData({...data,NokPhoneNo:event.target.value})
-        }
+    const handleInputValue = (key:string,value:any):void =>{
+        let Data={...data}
+        Data[key]=value
+        setData(Data)
+        // if(event.target.name==='Client Name'){
+        //     setData({...data,Name:event.target.value})
+        // }
+        // else if(event.target.name==='Phone No'){
+        //     setData({...data,PhoneNo:event.target.value})
+        // }
+        // else if(event.target.name==='Email'){
+        //     setData({...data,Email:event.target.value})
+        // }
+        // else if(event.target.name==='Contact Address'){ 
+        //     setData({...data,FirstAddress:event.target.value})
+        // }
+        // else if(event.target.name==='Second Address'){
+        //     setData({...data,SecondAddress:event.target.value})
+        // }
+        // else if(event.target.name==='Nok Name'){
+        //     setData({...data,NokName:event.target.value})
+        // }
+        // else{
+        //     setData({...data,NokPhoneNo:event.target.value})
+        // }
         
     }
+    const getPhoneNumber=async(number:string)=>{
+        await sp.web.lists.getByTitle(props.list.listName).items.select("PhoneNo").get().then((item)=>{
+            
+           let phoneNum=[];
+           item.forEach((value)=>{
+                let mobileNumber = value.PhoneNo ? value.PhoneNo:''
+               
+                phoneNum.push(mobileNumber)
+           })
 
+           let index = [...phoneNum].findIndex(value=>value===number);
+           phoneNum.splice(index,1)
+           setPhoneNum([...phoneNum])
+        }).catch((error)=>handleError("getPhonoNo",error))
+    }
     const validation = (type):boolean =>{
                 
         let isAllValueFilled=true;
         let emailvalidation=/^([A-Za-z0-9_.])+\@([g][m][a][i][l])+\.([c][o][m])+$/;
         let isDraft = (type === 'Draft' || type === 'Rejected') ? true:false;
-
+        let phoneNoValidation=[...phoneNum].every(value=>{            
+            return value !== data.PhoneNo
+        })
         if(!data.Name){
             setError('please fill name')
             isAllValueFilled = false;
         }
-        else if((!isDraft && !(data.PhoneNo && data.PhoneNo.toString().length===10)) ||  (data.PhoneNo && data.PhoneNo.toString().length!==10)){
+        else if((!isDraft && !data.PhoneNo)){
             setError('please enter a valid phone number')
+            isAllValueFilled = false;
+        }
+        else if((!isDraft && data.PhoneNo && !phoneNoValidation) || (isDraft && data && !phoneNoValidation)){
+            setError('phone number  already exists')
             isAllValueFilled = false;
         }
         else if((!isDraft && !(data.Email && emailvalidation.test(data.Email))) || (data.Email && !emailvalidation.test(data.Email))){
             setError('please enter a valid email')
             isAllValueFilled = false;
         }
-        else if((!isDraft && !data.FirstAddress) && true){
+        else if(!isDraft && !data.FirstAddress){
             setError('please enter a address')
             isAllValueFilled = false;
         }
-        else if((!isDraft && !data.NokName) && true){
+        else if(!isDraft && !data.NokName){
             setError('please enter a Nok Name')
             isAllValueFilled = false;
         }
-        else if((!isDraft && !(data.NokPhoneNo && data.NokPhoneNo.toString().length==10)) || (data.NokPhoneNo && data.NokPhoneNo.toString().length!==10)){
+        else if(!isDraft && !data.NokPhoneNo){
             setError('please enter Nok mobile number')
             isAllValueFilled = false;
         }
@@ -219,7 +243,8 @@ const ClientEditForm = (props:any):JSX.Element =>{
                                updateFiles:[],
                                deleteFiles:[]
                             })
-                            
+                            let cutrrentNumber = data.PhoneNo ? data.PhoneNo:'' 
+                            getPhoneNumber(cutrrentNumber)
                          })
                          .catch((error)=>handleError('get attachement',error))
                      }).catch((error)=>{handleError('edit get ',error);})
@@ -277,29 +302,29 @@ const ClientEditForm = (props:any):JSX.Element =>{
                 <div className={styles.formContent}>
                     <div className={styles.inputAlign}>
                         <div>
-                            <TextField value={data.Name} label='Client Name' styles={text} name='Client Name' onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
+                            <TextField value={data.Name} label='Client Name' styles={text} name='Client Name' onChange={(event,text)=>handleInputValue("Name",text)} disabled={isViewAuthentication}/>
                         </div>
                         <div>
-                            <TextField value={data.PhoneNo ? data.PhoneNo.toString():''} styles={text} label='Phone No' name='Phone No' type='number' maxLength={10} onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
+                            <TextField value={data.PhoneNo} styles={text} label='Phone No' name='Phone No'  maxLength={10} onChange={(event,text)=>handleInputValue("PhoneNo",text)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
                     <div>
-                        <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
+                        <TextField value={data.Email} label='Email' name='Email' styles={text} onChange={(event,text)=>handleInputValue("Email",text)} disabled={isViewAuthentication}/>
                     </div>
                     <div className={styles.inputAlign}>
                         <div>
-                            <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
+                            <TextField value={data.FirstAddress} label='Contact Address' styles={text} name='Contact Address' multiline rows={3} onChange={(event,text)=>handleInputValue("FirstAddress",text)} disabled={isViewAuthentication}/>
                         </div>
                         <div>
-                            <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
+                            <TextField value={data.SecondAddress} label='Second Address' styles={text} name='Second Address' multiline rows={3} onChange={(event,text)=>handleInputValue("SecondAddress",text)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
                     <div className={styles.inputAlign}>
                         <div>
-                            <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
+                            <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event,text)=>handleInputValue("NokName",text)} disabled={isViewAuthentication}/>
                         </div>
                         <div>
-                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event)=>handleInputValue(event)} disabled={isViewAuthentication}/>
+                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event,text)=>handleInputValue("NokPhoneNo",text)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
 
