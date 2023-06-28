@@ -12,7 +12,7 @@ interface IProviderAdd{
     FirstAddress:string;
     SecondAddress:string;
     NokName:string;
-    NokPhoneNo:number;
+    NokPhoneNo:string;
     status:string;
     files:any,
     updateFiles:any,
@@ -30,10 +30,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             }
         }
     }
-    const options = [
-        { key: 'Draft', text: 'Draft' },
-        { key: 'Add', text: 'Add' },
-    ]
 
     const [error,setError] = useState<string>('')
     const [phoneNum,setPhoneNum]=useState([])    
@@ -65,32 +61,15 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     }
 
     const handleInputValue = (key:string,value:any):void =>{
+
         let Data={...data}
         Data[key]=value
         setData(Data)
-        // if(event.target.name==='Provider Name'){
-        //     setData({...data,Name:event.target.value})
-        // }
-        // else if(event.target.name==='Phone No'){
-        //     setData({...data,PhoneNo:event.target.value})
-        // }
-        // else if(event.target.name==='Email'){
-        //     setData({...data,Email:event.target.value})
-        // }
-        // else if(event.target.name==='Contact Address'){ 
-        //     setData({...data,FirstAddress:event.target.value})
-        // }
-        // else if(event.target.name==='Second Address'){
-        //     setData({...data,SecondAddress:event.target.value})
-        // }
-        // else if(event.target.name==='Nok Name'){
-        //     setData({...data,NokName:event.target.value})
-        // }
-        // else{
-        //     setData({...data,NokPhoneNo:event.target.value})
-        // }
+        
     }
+
     const getPhoneNumber=async(number:string)=>{
+
         await sp.web.lists.getByTitle(props.list.listName).items.select("PhoneNo").get().then((item)=>{
             
            let phoneNum=[];
@@ -104,7 +83,9 @@ const ProviderEditForm = (props:any):JSX.Element =>{
            phoneNum.splice(index,1)
            setPhoneNum([...phoneNum])
         }).catch((error)=>handleError("getPhonoNo",error))
+
     }
+
     const validation = (type:string):boolean =>{
                 
         let isAllValueFilled=true;
@@ -113,6 +94,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         let phoneNoValidation=[...phoneNum].every(value=>{            
             return value !== data.PhoneNo
         }) 
+
         if(!data.Name){
             setError('please fill name')
             isAllValueFilled = false;
@@ -146,9 +128,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             isAllValueFilled = true;
         }
         return isAllValueFilled;
+
     }
  
     const handleUpdate = async (type:string) =>{
+
         var updateAuthetication = validation(type);
         
         let newJson={
@@ -190,6 +174,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                 props.setChange({...props.change,ProviderEdit:true,isSpinner:false})
             })
         }
+
     }
 
     const handleBtnAuthendication = (result) =>{
@@ -215,9 +200,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                 isRejected:false
             })
         }
+
     }
 
     const getData = async () =>{
+
         await sp.web.lists.getByTitle(props.list.listName).items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
         .then(async (data)=>{
             handleBtnAuthendication(data)
@@ -249,9 +236,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             }
         })
         .catch(error=>handleError('provider edit get',error))
+
     }
 
     const handleFileClose = (value,index) =>{
+
         var currentFiles = [...data.files]
         currentFiles.splice(index,1);
 
@@ -262,10 +251,12 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     }
 
     const handleUpdateFileClose = (value:any,index:number) =>{
+
         var newUpdateFiles = [...data.updateFiles];
         newUpdateFiles.splice(index,1)
 
         setData({...data,updateFiles:newUpdateFiles})
+
     }
 
     const handleUpdateFile = (event:any) =>{
@@ -285,9 +276,11 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     }
 
     useEffect(()=>{
+
         if(props.formView.authentication){
             getData();   
         }
+        
     },[props.formView.authentication])
 
     return(
@@ -322,7 +315,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                             <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event,text)=>handleInputValue("NokName",text)} disabled={isViewAuthentication}/>
                         </div>
                         <div>
-                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event,text)=>handleInputValue("NokPhoneNo",text)} disabled={isViewAuthentication}/>
+                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' onChange={(event,text)=>handleInputValue("NokPhoneNo",text)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
 

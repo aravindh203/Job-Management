@@ -18,13 +18,16 @@ interface IComponentChange{
     conturctorEdit:boolean;
     isSpinner:boolean;
 }
+
 interface IFormView{
     authentication:boolean;
     Id:number;
     status:string;
 }
-const MainCoimponent=(props:any)=>{
 
+const MainCoimponent=(props:any)=>{
+    
+    const currentUser= props.context._pageContext._user.email;
     const circle={
         root:{
             ".ms-Spinner-circle":{
@@ -35,13 +38,21 @@ const MainCoimponent=(props:any)=>{
         }
     }
 
-    const currentUser= props.context._pageContext._user.email;
 
     const [pageRender,setPageRender] = useState<string>('Provider')       
     const [admin,setAdmin ] =useState<boolean>(false);
     const [manager,setManager]=useState<boolean>(false)
     const [Visitors,setVisitor]=useState<boolean>(false)    
     const [dbAuthentication,setDbAuthentication] = useState<boolean>(true)
+    const [list,setList] = useState({
+        listName:'ProviderList',
+        libraryName:'ProviderAttachment'
+    }) 
+    const [formView,setFormView]=React.useState<IFormView>({
+        authentication:false,
+        Id:null,
+        status:''
+    })
     const [componentChange,setComponentChange]=React.useState<IComponentChange>({
         provider:false,
         ProviderEdit:false,
@@ -51,48 +62,48 @@ const MainCoimponent=(props:any)=>{
         conturctorEdit:false,
         isSpinner:false,
     })
-    const [list,setList] = useState({
-        listName:'ProviderList',
-        libraryName:'ProviderAttachment'
-    }) 
-   
-    const [formView,setFormView]=React.useState<IFormView>({
-        authentication:false,
-        Id:null,
-        status:''
-    })
+    
 
     const handleError = (type:string,error:any):void =>{
         console.log(type,error)
     }
    
     const getVisitors= async () =>{
+
         await sp.web.siteGroups.getByName('Visitors').users.get()
         .then(data=>{
             let isVisitorAuthentication = data.some(value=>value.Email===currentUser);
+
             setVisitor(isVisitorAuthentication)
         })
         .catch(error=>handleError('get group Admin',error))
+
     }
 
     const getManagers = async () =>{
+
         await sp.web.siteGroups.getByName('Manager').users.get()
         .then(data=>{
             let ismanagerAuthentication = data.some(value=>value.Email===currentUser);
+
             setManager(ismanagerAuthentication)
             getVisitors()
         })
         .catch(error=>handleError('get group manager',error))
+
     }
 
     const getAdmin = async () =>{
+
         await sp.web.siteGroups.getByName('Admin').users.get()
         .then(data=>{
             let isAdminAuthentication = data.some(value=>value.Email===currentUser)
+
             setAdmin(isAdminAuthentication)
             getManagers()
         })
         .catch(error=>handleError('get group Admin',error))
+
     }
     
     useEffect(()=>{
@@ -100,6 +111,7 @@ const MainCoimponent=(props:any)=>{
     },[])
 
     useEffect(()=>{
+        
         var dashboard = [];
         for(let key in componentChange){
             dashboard.push(componentChange[key])

@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { useEffect,useState } from 'react';
-import { IStyleSet, Label, ILabelStyles, Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption, Icon, SearchBox } from '@fluentui/react';
-import {Item, sp} from "@pnp/sp/presets/all";
+import { Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode, IconButton, Dropdown, IDropdownOption, Icon, SearchBox } from '@fluentui/react';
+import { sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
 import { Pagination } from "@pnp/spfx-controls-react/lib/pagination";
-import { trimStart } from '@microsoft/sp-lodash-subset';
 
 interface IData{
     Id:number;
@@ -19,7 +18,9 @@ interface IData{
     CreatedBy:string;
 }
 
-const DashBoardComponent=(props:any):JSX.Element=>{    
+const DashBoardComponent=(props:any):JSX.Element=>{ 
+
+    const addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
     const addIcon={
         root:{
             ".ms-Button-icon":{
@@ -32,6 +33,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             }
         },
     }
+
     const list={
         root:{
             ".ms-DetailsHeader":{
@@ -48,98 +50,104 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             }
         }
     }
-    const option:IDropdownOption[]=[{
-        key:'All',
-        text:'All'
-    },
-    {
-        key:'Draft',
-        text:'Draft'
-    },
-    {
-        key:'Pending',
-        text:'Pending',   
-    },
-    {
-        key:'Approved',
-        text:'Approved',   
-    }]
 
-    const col:IColumn[]=[{
-        key:'1',
-        fieldName:'ProviderName',
-        name:'Name',
-        minWidth:100,
-        maxWidth:150
-    },
-    {
-        key:'2',
-        fieldName:'PhoneNo',
-        name:'PhoneNo',
-        minWidth:100,
-        maxWidth:150
-    },
-    {
-        key:'3',
-        fieldName:'ContactAdd',
-        name:'ContactAdd',
-        minWidth:100,
-        maxWidth:150
-    },
-    {
-        key:'4',
-        fieldName:'SecondaryAdd',
-        name:'SecondaryAdd',
-        minWidth:100,
-        maxWidth:150
-    },{
-        key:'5',
-        fieldName:'NokName',
-        name:'NokName',
-        minWidth:100,
-        maxWidth:150
-    },
-    {
-        key:'6',
-        fieldName:'NokPhoneNo',
-        name:'NokPhoneNo',
-        minWidth:100,
-        maxWidth:150
-    },{
-        key:'7',
-        fieldName:'Email',
-        name:'Email',
-        minWidth:100,
-        maxWidth:150
-    },
-    {
-        key:'8',
-        fieldName:'Status',
-        name:'Status',
-        minWidth:100,
-        maxWidth:150
-    },
-    {
-        key:'9',
-        fieldName:'Edit',
-        name:'Edit',
-        minWidth:100,
-        maxWidth:150,
-        onRender:(item)=>{
-            let userAuthentication= findUserAccess(item)  
-           return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{viewEditHnadle(item,'edit')}}/>
+    const option:IDropdownOption[]=[
+        {
+            key:'All',
+            text:'All'
+        },
+        {
+            key:'Draft',
+            text:'Draft'
+        },
+        {
+            key:'Pending',
+            text:'Pending',   
+        },
+        {
+            key:'Approved',
+            text:'Approved',   
         }
-    },
-    {
-        key:'10',
-        fieldName:'View',
-        name:'View',
-        minWidth:100,
-        maxWidth:150,
-        onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewEditHnadle(item,'view')}}/>)
-    }]
+    ]
 
-    let addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
+    const col:IColumn[]=[
+        {
+            key:'1',
+            fieldName:'ProviderName',
+            name:'Name',
+            minWidth:100,
+            maxWidth:150
+        },
+        {
+            key:'2',
+            fieldName:'PhoneNo',
+            name:'PhoneNo',
+            minWidth:100,
+            maxWidth:150
+        },
+        {
+            key:'3',
+            fieldName:'ContactAdd',
+            name:'ContactAdd',
+            minWidth:100,
+            maxWidth:150
+        },
+        {
+            key:'4',
+            fieldName:'SecondaryAdd',
+            name:'SecondaryAdd',
+            minWidth:100,
+            maxWidth:150
+        },
+        {
+            key:'5',
+            fieldName:'NokName',
+            name:'NokName',
+            minWidth:100,
+            maxWidth:150
+        },
+        {
+            key:'6',
+            fieldName:'NokPhoneNo',
+            name:'NokPhoneNo',
+            minWidth:100,
+            maxWidth:150
+        },
+        {
+            key:'7',
+            fieldName:'Email',
+            name:'Email',
+            minWidth:100,
+            maxWidth:150
+        },
+        {
+            key:'8',
+            fieldName:'Status',
+            name:'Status',
+            minWidth:100,
+            maxWidth:150
+        },
+        {
+            key:'9',
+            fieldName:'Edit',
+            name:'Edit',
+            minWidth:100,
+            maxWidth:150,
+            onRender:(item)=>{
+                let userAuthentication= findUserAccess(item)  
+            return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{viewEditHnadle(item,'edit')}}/>
+            }
+        },
+        {
+            key:'10',
+            fieldName:'View',
+            name:'View',
+            minWidth:100,
+            maxWidth:150,
+            onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewEditHnadle(item,'view')}}/>)
+        }
+    ]
+
     const [MData,setMData] = useState<IData[]>([])
     const [filter,setFilter] = useState<string>('All')
     const [filterData,setFilterData] = useState<IData[]>([]) 
@@ -162,9 +170,11 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
 
         return isEdit
+
     }
     
     const getProviderData=async()=>{
+
         await sp.web.lists.getByTitle(props.list.listName).items.select('id,ProviderName,PhoneNo,ContactAdd,SecondaryAdd,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{
             let masterData:IData[]=[]
             if(data.length){ 
@@ -192,9 +202,11 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         .catch((error)=>{
             errorFunction(error,"get provider Data")
         })
+
     }
 
     const getClientData=async()=>{
+
         await sp.web.lists.getByTitle(props.list.listName).items.select('id,ClientName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{
             let masterData:IData[]=[]
         if(data.length){
@@ -219,8 +231,10 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }).catch((error)=>{
             errorFunction(error,"get client Data")
         })
+
     }
     const getContructorData=async()=>{
+
         await sp.web.lists.getByTitle(props.list.listName).items.select('id,ContrctName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{
             
             let masterData:IData[]=[]
@@ -246,6 +260,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }).catch((error)=>{
             errorFunction(error,"get contructor Data")
         })
+
     }
 
     const dropFilter=()=>{
@@ -277,6 +292,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
 
     const handlePageChange = () =>{
+
         if(props.pageRender==='Provider'){
             props.setChange({...props.change,provider:true})
         }
@@ -286,9 +302,11 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         else if(props.pageRender==='Contructor'){
             props.setChange({...props.change,contructor:true})
         }
+
     }
 
     const viewEditHnadle = (item:IData,clickStatus:string)=>{
+
         props.setFormView({authentication:true,Id:item.Id,status:clickStatus})
 
         if(props.pageRender==='Provider'){
@@ -300,15 +318,18 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         else if(props.pageRender==='Contructor'){
             props.setChange({...props.change,conturctorEdit:true})
         }
+
     }
 
     const getPagination=()=>{
-        if(pageFilter.length>0){
+
+        if(pageFilter.length){
             let lastIndex=pagination.currentPage*pagination.displayItems
             let firstIndex=lastIndex-pagination.displayItems
             let displayData=[...pageFilter].slice(firstIndex,lastIndex)
             setFilterData(displayData)    
         }
+
     }
 
     const errorFunction=(error:any,name:string)=>{
@@ -324,6 +345,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     },[pagination,pageFilter])
 
     useEffect(()=>{
+
         if(props.pageRender==='Provider'){
             getProviderData()
         }
@@ -332,6 +354,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }else if(props.pageRender==='Contructor'){
             getContructorData()
         }     
+        
     },[props.list])
     
     return(

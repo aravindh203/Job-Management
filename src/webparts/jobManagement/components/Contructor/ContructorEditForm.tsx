@@ -12,7 +12,7 @@ interface IProviderAdd{
     FirstAddress:string;
     SecondAddress:string;
     NokName:string;
-    NokPhoneNo:number;
+    NokPhoneNo:string;
     status:string;
     files:any,
     updateFiles:any,
@@ -31,10 +31,6 @@ const ContructorEditForm = (props:any):JSX.Element =>{
             }
         }
     }
-    const options = [
-        { key: 'Draft', text: 'Draft' },
-        { key: 'Add', text: 'Add' },
-    ]
 
     const [error,setError] = useState<string>('')
     const [phoneNum,setPhoneNum]=useState([])    
@@ -51,10 +47,7 @@ const ContructorEditForm = (props:any):JSX.Element =>{
         files:[],
         updateFiles:[],
         deleteFiles:[]
-    })  
-    
-    console.log('data',data);
-    
+    })      
     const [btnAuthntication,setBtnAuthendication] = useState({
         isAddBtn:false,
         isDraftBtn:false,
@@ -69,34 +62,15 @@ const ContructorEditForm = (props:any):JSX.Element =>{
     }
 
     const handleInputValue = (key:string,value:any):void =>{
+
         let Data={...data}
         Data[key]=value
         setData(Data)
-        // if(event.target.name==='Contructor Name'){
-        //     setData({...data,Name:event.target.value})
-        // }
-        // else if(event.target.name==='Phone No' ){
-        //     setData({...data,PhoneNo:event.target.value})
-        // }
-        // else if(event.target.name==='Email'){
-        //     setData({...data,Email:event.target.value})
-        // }
-        // else if(event.target.name==='Contact Address'){ 
-        //     setData({...data,FirstAddress:event.target.value})
-        // }
-        // else if(event.target.name==='Second Address'){
-        //     setData({...data,SecondAddress:event.target.value})
-        // }
-        // else if(event.target.name==='Nok Name'){
-        //     setData({...data,NokName:event.target.value})
-        // }
-        // else{
-        //     setData({...data,NokPhoneNo:event.target.value})
-        // }
-        
+
     }
 
     const getPhoneNumber=async(number:string)=>{
+
         await sp.web.lists.getByTitle(props.list.listName).items.select("PhoneNo").get().then((item)=>{
             
            let phoneNum=[];
@@ -110,6 +84,7 @@ const ContructorEditForm = (props:any):JSX.Element =>{
            phoneNum.splice(index,1)
            setPhoneNum([...phoneNum])
         }).catch((error)=>handleError("getPhonoNo",error))
+
     }
 
     const validation = (type):boolean =>{
@@ -119,11 +94,7 @@ const ContructorEditForm = (props:any):JSX.Element =>{
         let isDraft = (type === 'Draft' || type === 'Rejected') ? true:false;
         let phoneNoValidation=[...phoneNum].every(value=>{            
             return value !== data.PhoneNo
-        }) 
-        console.log('edit isDraft ',isDraft);
-        
-        console.log('edit phoneNoValidation',phoneNoValidation);
-        
+        })         
 
         if(!data.Name){
             setError('please fill name')
@@ -158,9 +129,11 @@ const ContructorEditForm = (props:any):JSX.Element =>{
             isAllValueFilled = true;
         }
         return isAllValueFilled;
+
     }
  
     const handleUpdate = async (type:string) =>{
+
         var updateAuthetication = validation(type);
         
         let newJson={
@@ -202,6 +175,7 @@ const ContructorEditForm = (props:any):JSX.Element =>{
                 props.setChange({...props.change,conturctorEdit:true,isSpinner:false})
             })
         }
+
     }
 
     const handleBtnAuthendication = (result) =>{
@@ -227,9 +201,11 @@ const ContructorEditForm = (props:any):JSX.Element =>{
                 isRejected:false
             })
         }
+
     }
 
     const getData = async () =>{
+
         await sp.web.lists.getByTitle(props.list.listName).items.select('id,ContrctName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status').getById(props.formView.Id).get()
         .then(async (data)=>{
             handleBtnAuthendication(data)
@@ -262,9 +238,11 @@ const ContructorEditForm = (props:any):JSX.Element =>{
             }
         })
         .catch(error=>handleError('Contructor edit get',error))
+
     }
 
     const handleFileClose = (value,index) =>{
+
         var currentFiles = [...data.files]
         currentFiles.splice(index,1);
 
@@ -275,10 +253,12 @@ const ContructorEditForm = (props:any):JSX.Element =>{
     }
 
     const handleUpdateFileClose = (value:any,index:number) =>{
+
         var newUpdateFiles = [...data.updateFiles];
         newUpdateFiles.splice(index,1)
 
         setData({...data,updateFiles:newUpdateFiles})
+
     }
 
     const handleUpdateFile = (event:any) =>{
@@ -298,9 +278,11 @@ const ContructorEditForm = (props:any):JSX.Element =>{
     }
 
     useEffect(()=>{
+
         if(props.formView.authentication){
             getData();   
         }
+        
     },[props.formView.authentication])
 
     return(
@@ -335,7 +317,7 @@ const ContructorEditForm = (props:any):JSX.Element =>{
                             <TextField value={data.NokName} label='Nok Name'styles={text} name='Nok Name' onChange={(event,text)=>handleInputValue("NokName",text)} disabled={isViewAuthentication}/>
                         </div>
                         <div>
-                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' type='number' onChange={(event,text)=>handleInputValue("NokPhoneNo",text)} disabled={isViewAuthentication}/>
+                            <TextField value={data.NokPhoneNo ? data.NokPhoneNo.toString():''} styles={text} label='Nok Phone No' name='Nok Phone No' onChange={(event,text)=>handleInputValue("NokPhoneNo",text)} disabled={isViewAuthentication}/>
                         </div>
                     </div>
 
