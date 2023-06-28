@@ -244,7 +244,7 @@ const ClientForm = (props:any):JSX.Element =>{
                             )
                         }):null}
                     </div>
-                    <input name='file' type='file' onChange={(event)=>{fileUpload(event.target.files)}} multiple />
+                    <input className={styles.input} name='file' type='file' onChange={(event)=>{fileUpload(event.target.files)}} multiple />
 
                     <div>
                         <p style={{textAlign:'center',color:'red'}}>{error}</p>
