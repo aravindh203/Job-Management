@@ -187,6 +187,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
 
     const errorFunction=(name:string,error:any)=>{
         console.log(error,name);
+        props.setChange({...props.change,isError:true})
     }
 
     useEffect(()=>{
