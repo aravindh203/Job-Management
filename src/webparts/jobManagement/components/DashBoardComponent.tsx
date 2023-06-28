@@ -233,6 +233,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         })
 
     }
+    
     const getContructorData=async()=>{
 
         await sp.web.lists.getByTitle(props.list.listName).items.select('id,ContrctName,PhoneNo,ContactAddress,SecondAddress,NokName,NokPhoneNo,Email,Status,Author/EMail').orderBy('Modified',false).expand("Author").get().then((data)=>{

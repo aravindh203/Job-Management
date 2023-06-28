@@ -149,7 +149,9 @@ const ProviderAddForm = (props:any):JSX.Element =>{
             Status:btnVal==='Add' ? 'Pending':'Draft'
         }
         if(submitAuthetication){
+            
             props.setChange({...props.change,provider:false,isSpinner:true})
+            
             await sp.web.lists.getByTitle(props.list.listName).items.add(newJson)
             .then((result)=>{                                
                 createFolder(result.data.Id);
@@ -204,7 +206,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
                             <TextField value={data.Name} label='Provider Name' styles={text} name='Provider Name' onChange={(event,text)=>handleInputValue("Name",text)} disabled={false}/>
                         </div>
                         <div>
-                            <TextField value={data.PhoneNo} styles={text} label='Phone No' name='Phone No' maxLength={10} onChange={(event,text)=>handleInputValue("PhoneNo",text)} disabled={false}/>
+                            <TextField value={data.PhoneNo} styles={text} label='Phone No' name='Phone No' onChange={(event,text)=>handleInputValue("PhoneNo",text)} disabled={false}/>
                         </div>
                     </div>
                     <div>

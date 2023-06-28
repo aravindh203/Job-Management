@@ -205,7 +205,7 @@ const ContructorForm = (props:any):JSX.Element =>{
                             <TextField value={data.Name} label='Contructor Name' styles={text} name='Contructor Name' onChange={(event,text)=>handleInputValue("Name",text)} disabled={false}/>
                         </div>
                         <div>
-                            <TextField value={data.PhoneNo} styles={text} label='Phone No' name='Phone No' maxLength={10} onChange={(event,text)=>handleInputValue("PhoneNo",text)} disabled={false}/>
+                            <TextField value={data.PhoneNo} styles={text} label='Phone No' name='Phone No' onChange={(event,text)=>handleInputValue("PhoneNo",text)} disabled={false}/>
                         </div>
                     </div>
                     <div>
