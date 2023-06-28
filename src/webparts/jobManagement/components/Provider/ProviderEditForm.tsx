@@ -280,7 +280,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
         if(props.formView.authentication){
             getData();   
         }
-        
+
     },[props.formView.authentication])
 
     return(
@@ -340,7 +340,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                             )
                         }
                     </div>
-                    {isInputView && <input name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
+                    {isInputView && <input className={styles.input} name='file' type='file' onChange={(event)=>handleUpdateFile(event)} multiple />}
                     <div>
                         {  
                             data.updateFiles.length ? 
