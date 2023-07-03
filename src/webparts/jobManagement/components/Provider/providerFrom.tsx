@@ -159,7 +159,6 @@ const ProviderAddForm = (props:any):JSX.Element =>{
             })
             .catch(error=>{
                 errorFunction('add error',error);
-                props.setChange({...props.change,provider:true,isSpinner:false})
             })
         }
         
@@ -187,7 +186,16 @@ const ProviderAddForm = (props:any):JSX.Element =>{
 
     const errorFunction=(name:string,error:any)=>{
         console.log(error,name);
-        props.setChange({...props.change,isError:true})
+        props.setChange({
+            provider:false,
+            ProviderEdit:false,
+            client:false,
+            clientEdit:false,
+            contructor:false,
+            conturctorEdit:false,
+            isError:true,
+            isSpinner:false
+        })
     }
 
     useEffect(()=>{

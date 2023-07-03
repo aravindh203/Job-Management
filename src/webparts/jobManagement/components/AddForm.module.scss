@@ -24,3 +24,15 @@
         flex-direction: row-reverse;
     }
 }
+
+.errorMsg {
+    text-align: center;
+    i {
+        font-size: 30px;
+        color: red;
+    }
+    h1,
+    h2 {
+        margin: 0;
+    }
+}
