@@ -335,7 +335,16 @@ const DashBoardComponent=(props:any):JSX.Element=>{
 
     const errorFunction=(error:any,name:string)=>{
         console.log(name,error,);
-        props.setChange({...props.change,isError:true})
+        props.setChange({
+            provider:false,
+            ProviderEdit:false,
+            client:false,
+            clientEdit:false,
+            contructor:false,
+            conturctorEdit:false,
+            isError:true,
+            isSpinner:false
+        })
     }
 
     useEffect(()=>{

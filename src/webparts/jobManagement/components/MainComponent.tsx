@@ -69,9 +69,18 @@ const MainCoimponent=(props:any)=>{
 
     const handleError = (type:string,error:any):void =>{
         console.log(type,error)
-        setComponentChange({...componentChange,isError:true})
+        setComponentChange({
+            provider:false,
+            ProviderEdit:false,
+            client:false,
+            clientEdit:false,
+            contructor:false,
+            conturctorEdit:false,
+            isError:true,
+            isSpinner:false
+        })
     }
-   
+  
     const getVisitors= async () =>{
 
         await sp.web.siteGroups.getByName('Visitors').users.get()

@@ -58,7 +58,16 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     
     const handleError = (type:string,error:any):void =>{
         console.log(error)
-        props.setChange({...props.change,isError:true})
+        props.setChange({
+            provider:false,
+            ProviderEdit:false,
+            client:false,
+            clientEdit:false,
+            contructor:false,
+            conturctorEdit:false,
+            isError:true,
+            isSpinner:false
+        })
     }
 
     const handleInputValue = (key:string,value:any):void =>{
@@ -172,7 +181,6 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             })
             .catch(error=>{
                 handleError('provider update',error)
-                props.setChange({...props.change,ProviderEdit:true,isSpinner:false})
             })
         }
 
