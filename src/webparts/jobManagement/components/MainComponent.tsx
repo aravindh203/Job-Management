@@ -10,6 +10,8 @@ import ClientEditForm from './Client/ClientEditForm';
 import ContructorForm from './Contructor/ContructorForm';
 import ContructorEditForm from './Contructor/ContructorEditForm';
 import ErrorComponent from './ErrorComponent';
+import Services from './Services/Services';
+import ServiceEditForm from './Services/ServiceEditForm';
 interface IComponentChange{
     provider:boolean;
     ProviderEdit:boolean;
@@ -17,6 +19,8 @@ interface IComponentChange{
     clientEdit:boolean;
     contructor:boolean;
     conturctorEdit:boolean;
+    services:boolean;
+    servicesEdit:boolean;
     isError:boolean;
     isSpinner:boolean;
 }
@@ -62,6 +66,8 @@ const MainCoimponent=(props:any)=>{
         clientEdit:false,
         contructor:false,
         conturctorEdit:false,
+        services:false,
+        servicesEdit:false,
         isError:false,
         isSpinner:false,
     })
@@ -76,6 +82,8 @@ const MainCoimponent=(props:any)=>{
             clientEdit:false,
             contructor:false,
             conturctorEdit:false,
+            services:false,
+            servicesEdit:false,
             isError:true,
             isSpinner:false
         })
@@ -152,6 +160,9 @@ const MainCoimponent=(props:any)=>{
         else if(pageRender === 'Contructor'){
             setList({listName:'Contructor',libraryName:'ContructorAttachment'})
         }
+        else if(pageRender === 'Services'){
+            setList({listName:'Services',libraryName:'ServiceAttachment'})
+        }
         
     },[pageRender])
 
@@ -170,6 +181,10 @@ const MainCoimponent=(props:any)=>{
             { componentChange.contructor && <ContructorForm list={list} change={componentChange} admin={admin} manager={manager} visitors={Visitors} setChange={setComponentChange} formView={formView}/> } 
 
             { componentChange.conturctorEdit && <ContructorEditForm list={list} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
+
+            { componentChange.services && <Services list={list} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
+
+            { componentChange.servicesEdit && <ServiceEditForm list={list} currentUser={currentUser} admin={admin} manager={manager} visitors={Visitors} change={componentChange} setChange={setComponentChange} formView={formView} setFormView={setFormView}/> }
 
             { componentChange.isSpinner && <Spinner styles={circle}/> }
 

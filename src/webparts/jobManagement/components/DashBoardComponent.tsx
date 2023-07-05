@@ -4,6 +4,7 @@ import { Pivot, PivotItem, CommandBarButton, DetailsList, IColumn, SelectionMode
 import { sp} from "@pnp/sp/presets/all";
 import styles from './AddForm.module.scss'
 import { Pagination } from "@pnp/spfx-controls-react/lib/pagination";
+import * as moment from 'moment';
 
 interface IData{
     Id:number;
@@ -17,7 +18,13 @@ interface IData{
     Status:string;
     CreatedBy:string;
 }
-
+interface IData1{
+    ServiceName:string;
+    ServiceDate:string;
+    Notes:string;
+    Status:string;
+    Id:number;
+}
 const DashBoardComponent=(props:any):JSX.Element=>{ 
 
     const addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
@@ -65,11 +72,24 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             text:'Pending',   
         },
         {
-            key:'Approved',
-            text:'Approved',   
+            key:'Approve',
+            text:'Approve',   
         }
     ]
-
+    const option1:IDropdownOption[]=[
+        {
+            key:'All',
+            text:'All'
+        },
+        {
+            key:'InProgress',
+            text:'InProgress'
+        },
+        {
+            key:'Complete',
+            text:'Complete'
+        }
+    ]
     const col:IColumn[]=[
         {
             key:'1',
@@ -147,19 +167,64 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewEditHnadle(item,'view')}}/>)
         }
     ]
+    const col1:IColumn[]=[{
+        key:'1',
+        fieldName:'ServiceName',
+        name:'ServiceName',
+        minWidth:100,
+        maxWidth:150
+    },{
+        key:'2',
+        fieldName:'ServiceDate',
+        name:'ServiceDate',
+        minWidth:100,
+        maxWidth:150
+    },{
+        key:'3',
+        fieldName:'Notes',
+        name:'Notes',
+        minWidth:100,
+        maxWidth:150
+    },{
+        key:'4',
+        fieldName:'Status',
+        name:'Status',
+        minWidth:100,
+        maxWidth:150
+    },{
+        key:'5',
+        fieldName:'Edit',
+        name:'Edit',
+        minWidth:100,
+        maxWidth:150,
+        onRender:(item)=>{
+            // let userAuthentication= findUserAccess(item)  
+        return <IconButton iconProps={{ iconName: 'edit' }}  title="Edit" ariaLabel="Edit" onClick={()=>{viewEditHnadle(item,'edit')}}/>
+        }
+    },
+    {
+        key:'6',
+        fieldName:'View',
+        name:'View',
+        minWidth:100,
+        maxWidth:150,
+        onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewEditHnadle(item,'view')}}/>)
+    }]
 
     const [MData,setMData] = useState<IData[]>([])
+    const [MData1,setMData1]=useState<IData1[]>([])
+    const [MasterData,setMasterData]=useState([])
     const [filter,setFilter] = useState<string>('All')
-    const [filterData,setFilterData] = useState<IData[]>([]) 
-    const [pageFilter,setPageFilter] = useState<IData[]>([])
+    const [filterData,setFilterData] = useState([]) 
+    const [pageFilter,setPageFilter] = useState([])
     const[search,setSearch] = useState<string>('')
     const [pagination,setPagination] = useState({
         currentPage:1,
         displayItems:5,
     })
-    
+   
     const findUserAccess=(item:any)=>{
-
+        
         let isEdit = true;
 
         if( props.admin &&  (item.Status=="Draft" || item.Status=="Rejected") && item.CreatedBy==props.currentUser){
@@ -192,12 +257,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                         CreatedBy:item.Author.EMail ? item.Author.EMail:''
                     })
                 })
-                
-                setPageFilter(masterData)
-            } 
-            setMData(masterData);
-            setFilterData(masterData);
+                setMData(masterData);
+            // setFilterData(masterData);
             setPageFilter(masterData)  
+            } else{
+                setMData([])
+                setPageFilter([])
+            }
+            
         })
         .catch((error)=>{
             errorFunction(error,"get provider Data")
@@ -224,10 +291,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     CreatedBy:item.Author.EMail ? item.Author.EMail:''
                 })
             })
-        } 
-        setMData(masterData);
-        setFilterData(masterData);
+            setMData(masterData);
+        // setFilterData(masterData);
         setPageFilter(masterData)
+        } else{
+            setMData([])
+            setPageFilter([])
+        }
+        
         }).catch((error)=>{
             errorFunction(error,"get client Data")
         })
@@ -254,37 +325,72 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     CreatedBy:item.Author.EMail ? item.Author.EMail:''
                 })
             })
-        } 
-        setMData(masterData);
-        setFilterData(masterData);
+            setMData(masterData);
+        // setFilterData(masterData);
         setPageFilter(masterData)
+        } else{
+            setMData([])
+            setPageFilter([])
+        }
+        
         }).catch((error)=>{
             errorFunction(error,"get contructor Data")
         })
 
     }
+    const getServiceData=async()=>{
+        await sp.web.lists.getByTitle(props.list.listName).items.select('*').orderBy('Modified',false).get().then((data)=>{
+            let masterData:IData1[]=[];
+            if(data.length){
+                data.forEach((item)=>{
+                    masterData.push({
+                        ServiceName: item.ServiceName ? item.ServiceName:'',
+                        ServiceDate: item.ServiceDate ? moment(item.ServiceDate).format('YYYY/MM/DD'):'',
+                        Notes: item.Notes ? item.Notes:'',
+                        Status: item.Status ? item.Status:'',
+                        Id: item.Id ? item.Id :null
+                    })
+                })
+                setMData1([...masterData])
+            setPageFilter([...masterData])
+            }else{
+                setMData1([])
+                setPageFilter([])
+            }
+            
+        }).catch((error)=>{
+            errorFunction(error,"get Services Data")
+        })
+    }
 
     const dropFilter=()=>{
-        
-        var filterData1:IData[] = [...MData].filter(value=>{
+     
+        var filterData1 = [...MasterData].filter(value=>{
             if(filter==="Draft"){
                 return value.Status==='Draft'
             }
             else if(filter==="Pending"){
                 return value.Status==='Pending'    
             }
-            else if(filter==="Approved"){  
-                return value.Status==='Approved'
+            else if(filter==="Approve"){  
+                return value.Status==='Approve'
+            }
+            else if(filter==="InProgress"){
+                return value.Status==='InProgress'
+            }
+            else if(filter==='Complete'){
+                return value.Status==='Complete'
             }
             else{
                 return value
             }
         })  
-
+      
+        let searchName=props.pageRender !=='Services' ? 'ProviderName':'ServiceName'
         let searchdata=[]
         if(filterData1.length){            
             searchdata=[...filterData1].filter((value)=>{
-                return value.ProviderName.toLowerCase().startsWith(search.trimStart())
+                return value[searchName].toLowerCase().startsWith(search.trimStart())
             })
         }
         setPageFilter([...searchdata])
@@ -302,6 +408,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
         else if(props.pageRender==='Contructor'){
             props.setChange({...props.change,contructor:true})
+        }else if(props.pageRender==='Services'){
+            props.setChange({...props.change,services:true})
         }
 
     }
@@ -319,7 +427,9 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         else if(props.pageRender==='Contructor'){
             props.setChange({...props.change,conturctorEdit:true})
         }
-
+        else if(props.pageRender==='Services'){
+            props.setChange({...props.change,servicesEdit:true})
+        }
     }
 
     const getPagination=()=>{
@@ -328,9 +438,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             let lastIndex=pagination.currentPage*pagination.displayItems
             let firstIndex=lastIndex-pagination.displayItems
             let displayData=[...pageFilter].slice(firstIndex,lastIndex)
-            setFilterData(displayData)    
+            setFilterData(displayData)                
         }
-
     }
 
     const errorFunction=(error:any,name:string)=>{
@@ -354,9 +463,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     useEffect(()=>{
         getPagination()
     },[pagination,pageFilter])
-
     useEffect(()=>{
-
+        if(props.pageRender !=='Services'){
+            setMasterData([...MData]) 
+        }else{
+            setMasterData([...MData1])
+        }
+    },[MData,MData1])
+    useEffect(()=>{
         if(props.pageRender==='Provider'){
             getProviderData()
         }
@@ -364,7 +478,9 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             getClientData()
         }else if(props.pageRender==='Contructor'){
             getContructorData()
-        }     
+        }else if(props.pageRender==='Services'){
+            getServiceData()
+        }    
         
     },[props.list])
     
@@ -388,6 +504,11 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                                 props.setPageRender(item.headerText)
                             }}>Contructor</div>
                         }}/>
+                    <PivotItem headerText="Services" itemKey={'Services'} onRenderItemLink={(item)=>{
+                            return <div onClick={()=>{
+                                props.setPageRender(item.headerText)
+                            }}>Services</div>
+                        }}/>
                 </Pivot>
             </div>            
             <div className={styles.btnAlign}>
@@ -395,7 +516,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     <div className={styles.dropDown}>
                         <Dropdown
                             label="Status"
-                            options={option}
+                            options={props.pageRender !=='Services' ? option:option1}
                             selectedKey={filter}
                             onChange={(e,item)=>setFilter(item.text)}
                         />
@@ -411,7 +532,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 </div>
             </div>
             <div>
-                <DetailsList items={filterData} columns={col} selectionMode={SelectionMode.none} styles={list}/>
+                <DetailsList items={filterData} columns={props.pageRender !=='Services' ? col:col1} selectionMode={SelectionMode.none} styles={list}/>
             </div>
             <div>
             <Pagination

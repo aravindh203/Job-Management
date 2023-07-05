@@ -275,7 +275,7 @@ const ContructorEditForm = (props:any):JSX.Element =>{
         var updatedfiles=[]
         for(let i=0;i<event.target.files.length;i++){
 
-            let existAuthendication = [...data.files].some(value=>{value.Name===event.target.files[i].name})
+            let existAuthendication = [...data.files].some(value=>value.Name===event.target.files[i].name)
             
             if(!existAuthendication){
                 updatedfiles.push(event.target.files[i])

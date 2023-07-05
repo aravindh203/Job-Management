@@ -1,0 +1,45 @@
+.serviceContainer {
+    width: 100%;
+    padding: 20px;
+    border: 1px solid gray;
+    box-sizing: border-box;
+    margin: 20px 0px;
+    .serviceContent {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3.5%;
+        .serviceBox {
+            width: 31%;
+        }
+    }
+}
+
+.labelTag {
+    display: block;
+    margin: 5px 0;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.serviceBtn {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.cancelBox {
+    display: flex;
+    background-color: #8f3cde;
+    padding: 0px 20px;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    border-radius: 7px 7px 0 0;
+    .cancelBtn {
+        color: #fff;
+    }
+    .cancelBtn:hover {
+        background-color: #8f3cde;
+    }
+}

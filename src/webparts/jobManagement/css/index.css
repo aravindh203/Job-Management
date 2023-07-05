@@ -7,3 +7,20 @@
     padding: 0 !important;
     max-width: 100% !important;
 }
+
+.ms-Stack-inner .ms-Button--primary {
+    background-color: #8f3cde !important;
+    width: 30px;
+    border-radius: 50%;
+    border: none;
+}
+
+.ms-Stack-inner .ms-Button--primary:hover {
+    border: none;
+}
+
+.ms-Stack-inner .ms-Button--default {
+    width: 30px;
+    border-radius: 50%;
+    border: none;
+}
