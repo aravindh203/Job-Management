@@ -205,7 +205,7 @@ const ContructorForm = (props:any):JSX.Element =>{
         <div className={styles.contain}>
             <div className={styles.formContainer}>
                 <div className={styles.cancelBox}>
-                    <h3>contructor Add Form</h3>
+                    <h3>Contructor Add Form</h3>
                     <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,contructor:false})}}/>
                 </div>
                 <div className={styles.formContent}>
