@@ -21,6 +21,8 @@ interface IData{
 interface IData1{
     ServiceName:string;
     ServiceDate:string;
+    StartDate:string;
+    EndDate:string;
     Notes:string;
     Status:string;
     Id:number;
@@ -171,28 +173,40 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         key:'1',
         fieldName:'ServiceName',
         name:'ServiceName',
-        minWidth:100,
-        maxWidth:150
+        minWidth:200,
+        maxWidth:200
     },{
         key:'2',
         fieldName:'ServiceDate',
         name:'ServiceDate',
-        minWidth:100,
-        maxWidth:150
+        minWidth:150,
+        maxWidth:200
     },{
         key:'3',
         fieldName:'Notes',
         name:'Notes',
-        minWidth:100,
-        maxWidth:150
+        minWidth:150,
+        maxWidth:200
     },{
         key:'4',
         fieldName:'Status',
         name:'Status',
-        minWidth:100,
-        maxWidth:150
+        minWidth:150,
+        maxWidth:200
     },{
         key:'5',
+        fieldName:'StartDate',
+        name:'StartDate',
+        minWidth:150,
+        maxWidth:200
+    },{
+        key:'6',
+        fieldName:'EndDate',
+        name:'EndDate',
+        minWidth:150,
+        maxWidth:200
+    },{
+        key:'7',
         fieldName:'Edit',
         name:'Edit',
         minWidth:100,
@@ -203,12 +217,19 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
     },
     {
-        key:'6',
+        key:'8',
         fieldName:'View',
         name:'View',
         minWidth:100,
         maxWidth:150,
         onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{viewEditHnadle(item,'view')}}/>)
+    },{
+        key:'9',
+        fieldName:'ChildView',
+        name:'ChildView',
+        minWidth:100,
+        maxWidth:150,
+        onRender:(item)=>(<IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={()=>{props.setPageRender(item,'view')}}/>)
     }]
 
     const [MData,setMData] = useState<IData[]>([])
@@ -346,6 +367,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     masterData.push({
                         ServiceName: item.ServiceName ? item.ServiceName:'',
                         ServiceDate: item.ServiceDate ? moment(item.ServiceDate).format('YYYY/MM/DD'):'',
+                        StartDate: item.StartDate ? moment(item.StartDate).format('YYYY/MM/DD'):'',
+                        EndDate: item.EndDate ? moment(item.EndDate).format('YYYY/MM/DD'):'',
                         Notes: item.Notes ? item.Notes:'',
                         Status: item.Status ? item.Status:'',
                         Id: item.Id ? item.Id :null
@@ -440,6 +463,9 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             let displayData=[...pageFilter].slice(firstIndex,lastIndex)
             setFilterData(displayData)                
         }
+        else{
+            setFilterData([])
+        }
     }
 
     const errorFunction=(error:any,name:string)=>{
@@ -454,6 +480,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             isError:true,
             isSpinner:false
         })
+        props.seterror(error)
     }
 
     useEffect(()=>{
@@ -476,9 +503,11 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
         else if(props.pageRender==='Client'){
             getClientData()
-        }else if(props.pageRender==='Contructor'){
+        }
+        else if(props.pageRender==='Contructor'){
             getContructorData()
-        }else if(props.pageRender==='Services'){
+        }
+        else if(props.pageRender==='Services'){
             getServiceData()
         }    
         
@@ -535,12 +564,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 <DetailsList items={filterData} columns={props.pageRender !=='Services' ? col:col1} selectionMode={SelectionMode.none} styles={list}/>
             </div>
             <div>
-            <Pagination
-                currentPage={pagination.currentPage}
-                totalPages={Math.ceil(pageFilter.length/pagination.displayItems)} 
-                onChange={(page) =>setPagination({...pagination,currentPage:page})}
-                limiter={3} 
-                />
+            {filterData.length ? 
+                <Pagination
+                    currentPage={pagination.currentPage}
+                    totalPages={Math.ceil(pageFilter.length/pagination.displayItems)} 
+                    onChange={(page) =>setPagination({...pagination,currentPage:page})}
+                    limiter={3} 
+                    />:
+                <h3 style={{margin:'5px 0px',textAlign:'center'}}>No Result Data</h3>}
             </div>
         </div>
     )}

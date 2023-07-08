@@ -180,7 +180,7 @@ const ClientEditForm = (props:any):JSX.Element =>{
                     }
                 })
                 .catch(error=>handleError('get attachment folder',error))
-                props.setChange({...props.change,clientEdit:false,isSpinner:false})
+                props.setChange({...props.change,clientDashBoard:true,clientEdit:false,isSpinner:false})
             })
             .catch(error=>{
                 handleError('Client update',error)
@@ -299,7 +299,7 @@ const ClientEditForm = (props:any):JSX.Element =>{
             <div className={styles.formContainer}>
                 <div className={styles.cancelBox}>
                     <h3>Client {isViewAuthentication ? 'View':'Edit'} Form</h3>
-                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,clientEdit:false})}}/>
+                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,clientEdit:false,clientDashBoard:true})}}/>
                 </div>
                 <div className={styles.formContent}>
                     <div className={styles.inputAlign}>

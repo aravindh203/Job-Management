@@ -25,6 +25,15 @@
     }
 }
 
+.backBtn {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    i {
+        font-size: 20px;
+    }
+}
+
 .errorMsg {
     text-align: center;
     i {
