@@ -152,7 +152,7 @@ const ClientForm = (props:any):JSX.Element =>{
             await sp.web.lists.getByTitle(props.list.listName).items.add(newJson)
             .then((result)=>{                                
                 createFolder(result.data.Id);
-                props.setChange({...props.change,client:false,isSpinner:false})
+                props.setChange({...props.change,clientDashBoard:true,client:false,isSpinner:false})
             })
             .catch(error=>{
                 errorFunction('add error',error);
@@ -204,7 +204,7 @@ const ClientForm = (props:any):JSX.Element =>{
             <div className={styles.formContainer}>
                 <div className={styles.cancelBox}>
                     <h3>Client Add Form</h3>
-                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,client:false})}}/>
+                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,client:false,clientDashBoard:true})}}/>
                 </div>
                 <div className={styles.formContent}>
                     <div className={styles.inputAlign}>

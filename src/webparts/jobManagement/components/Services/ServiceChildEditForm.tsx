@@ -12,7 +12,7 @@ interface IData{
     SecondAddress:string;
     Id:number;
 }
-const ServiceEditForm=(props:any)=>{
+const ServiceChildEditForm=(props:any)=>{
     let approve:string='Approve'
     let viewAuthentication=props.formView.status=='view' ? true:false
    
@@ -40,14 +40,11 @@ const ServiceEditForm=(props:any)=>{
         ServiceDate:new Date(),
         Notes:'',
         Status:'',
-        Files:[],
-        UpdateFiles:[],
-        DeleteFiles:[],
         ProviderId:null,
         ClientId:null,
         ContructorId:null,
         ServiceId:null
-    })
+    })    
     const [providerData,setProviderData]=React.useState<IData>({
         Name:'',
         PhoneNo:'',
@@ -72,7 +69,26 @@ const ServiceEditForm=(props:any)=>{
         SecondAddress:'',
         Id:null
     })
-    
+    const [btnAuthntication,setBtnAuthendication]=React.useState({
+        BookConfirm:false,
+        Complete:false,
+        Invoice:false,
+        InvoicePaid:false,
+    })
+
+    const findStatus=()=>{
+       console.log('statsus',serviceData.Status);
+       
+        if(serviceData.Status==='InProgress'){
+            setBtnAuthendication({...btnAuthntication,BookConfirm:true})
+        }else if(serviceData.Status==='BookConfirm'){
+            setBtnAuthendication({...btnAuthntication,Complete:true})
+        }else if(serviceData.Status==='Complete'){
+            setBtnAuthendication({...btnAuthntication,Invoice:true})
+        }else if(serviceData.Status==='Invoice'){
+            setBtnAuthendication({...btnAuthntication,InvoicePaid:true})
+        }
+    }
     const getProviderDropData=async()=>{
         await sp.web.lists.getByTitle('ProviderList').items.select('id,ProviderName,Status').filter('Status eq ' + "'" + approve + "'").get().then((items)=>{
             if(items){
@@ -123,25 +139,18 @@ const ServiceEditForm=(props:any)=>{
 
     const getServicesdata=async()=>{
        
-        await sp.web.lists.getByTitle(props.list.listName).items.select('ServiceName,ServiceDate,Notes,Status,ProviderDetailsId,ClientDetailsId,ContrctDetailsId').getById(props.formView.Id).get().then(async(result)=>{
+        await sp.web.lists.getByTitle('ServiceChild').items.select('ServiceName,ServiceDate,ServiceId,Notes,Status,ProviderDetailsId,ClientDetailsId,ContrctDetailsId').getById(props.formView.Id).get().then(async(result)=>{
             if(result){                
-                await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.select('*').filter('Name eq'+"'"+result.Id+"'").get().then(async(res)=>{
-                    await sp.web.getFolderByServerRelativePath(res[0].ServerRelativeUrl).files.get().then((item)=>{
-                        setServiceData({
-                            ServiceName:result.ServiceName ? result.ServiceName:'',
-                            ServiceDate:result.ServiceDate ? new Date(result.ServiceDate):new Date(),
-                            Notes:result.Notes ?result.Notes:'',
-                            Status:result.Status ? result.Status:'',
-                            Files:item ? item:[],
-                            UpdateFiles:[],
-                            DeleteFiles:[],
-                            ProviderId:result.ProviderDetailsId ? result.ProviderDetailsId:null,
-                            ClientId:result.ClientDetailsId ? result.ClientDetailsId:null,
-                            ContructorId:result.ContrctDetailsId ? result.ContrctDetailsId:null,
-                            ServiceId:result.Id ? result.Id:null
-                        })
-                    }).catch((error)=>errorFunction(error,'get files data'))
-                }).catch((error)=>errorFunction(error,'get folder data'))
+                setServiceData({
+                    ServiceName:result.ServiceName ? result.ServiceName:'',
+                    ServiceDate:result.ServiceDate ? new Date(result.ServiceDate):new Date(),
+                    Notes:result.Notes ?result.Notes:'',
+                    Status:result.Status ? result.Status:'',
+                    ProviderId:result.ProviderDetailsId ? result.ProviderDetailsId:null,
+                    ClientId:result.ClientDetailsId ? result.ClientDetailsId:null,
+                    ContructorId:result.ContrctDetailsId ? result.ContrctDetailsId:null,
+                    ServiceId:result.ServiceId ? result.ServiceId:null
+                })
             }
         }).catch((error)=>errorFunction(error,'get service data'))
     }
@@ -191,9 +200,9 @@ const ServiceEditForm=(props:any)=>{
             }).catch((error)=>errorFunction(error,'get contructor data')) 
         }
     }
-    const handleUpdate=async()=>{
-        if(serviceData.ServiceId){
-            props.setChange({...props.change,servicesEdit:false,isSpinner:true})
+    const handleUpdate=async(status:string)=>{
+        if(props.formView.Id){
+            props.setChange({...props.change,serviceChildEdit:false,isSpinner:true})
             
             let testJson = {
                 ServiceName:serviceData.ServiceName ? serviceData.ServiceName:'',
@@ -202,52 +211,16 @@ const ServiceEditForm=(props:any)=>{
                 ProviderDetailsId:serviceData.ProviderId ? serviceData.ProviderId:null,
                 ClientDetailsId:serviceData.ClientId ? serviceData.ClientId:null,
                 ContrctDetailsId:serviceData.ContructorId ? serviceData.ContructorId:null,
+                Status: status
             }
 
-            await sp.web.lists.getByTitle(props.list.listName).items.getById(serviceData.ServiceId).update(testJson).then(async(response)=>{
-                await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.filter('Name eq ' + "'" + serviceData.ServiceId + "'").get()
-                .then(async(results)=>{
-                    for(let i=0;i<serviceData.DeleteFiles.length;i++){
-                        await sp.web.getFileByServerRelativePath(serviceData.DeleteFiles[i].ServerRelativeUrl).delete()
-                        .then(res=>console.log('del response',res))
-                        .catch(error=>errorFunction('attachement delete',error))
-                    }
-                    for(let k=0;k<serviceData.UpdateFiles.length;k++){
-                        await sp.web.getFolderByServerRelativePath(results[0].ServerRelativeUrl)
-                        .files.addUsingPath(serviceData.UpdateFiles[k].name,serviceData.UpdateFiles[k], { Overwrite: true })
-                        .then(result=>console.log('data updated succesfully'))
-                        .catch(error=>errorFunction('attachment update',error))
-                    }
-                    props.setChange({...props.change,servicesDashBoard:true,servicesEdit:false,isSpinner:false})
-                }).catch((error)=>errorFunction(error,'update folder'))
+            await sp.web.lists.getByTitle('ServiceChild').items.getById(props.formView.Id).update(testJson).then(async(response)=>{
+                props.setFormView({...props.formView,Id:serviceData.ServiceId})
+                props.setChange({...props.change,serviceChildDashBoard:true,serviceChildEdit:false,isSpinner:false})
             }).catch((error)=>errorFunction(error,'update service data'))
         }
     }
-    const fileUpload=(event)=>{
-       
-        let updateFiles=[]
-        let fileAuthentication
-        for(let i=0;i<event.target.files.length;i++){
-           fileAuthentication=serviceData.Files.some(value=>{return value.Name===event.target.files[i].name})
-           if(!fileAuthentication){
-            updateFiles.push(event.target.files[i])
-           }
-        }
-        
-        setServiceData({...serviceData,UpdateFiles:updateFiles})  
-    }
-    const handleUpdateFileClose=(index)=>{
-        let updateFileDelete=[...serviceData.UpdateFiles]
-        updateFileDelete.splice(index,1)
-        setServiceData({...serviceData,UpdateFiles:updateFileDelete})
-    }
-    const handleFileClose=(value,index)=>{
-        let deletefiles=[...serviceData.Files]
-        deletefiles.splice(index,1)
-        let deletedData=[...serviceData.DeleteFiles]
-        deletedData.push(value)
-        setServiceData({...serviceData,Files:deletefiles,DeleteFiles:deletedData})
-    }
+    
     const dateformat=(date:Date):string=>{
         return moment(date).format("YYYY/MM/DD")
     }
@@ -279,6 +252,7 @@ const ServiceEditForm=(props:any)=>{
     },[props.formView.authentication])
     React.useEffect(()=>{
         getProviderData()
+        findStatus()
     },[serviceData])
     React.useEffect(()=>{
         getProviderDropData()
@@ -286,8 +260,8 @@ const ServiceEditForm=(props:any)=>{
     return(
         <div style={{boxSizing:'border-box'}}>
             <div className={styles.cancelBox}>
-                <h3>Service Edit Form</h3>
-                <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelBtn} onClick={()=>{props.setChange({...props.change,servicesEdit:false,servicesDashBoard:true})}}/>
+                <h3>Service Child Edit Form</h3>
+                <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelBtn} onClick={()=>{props.setChange({...props.change,serviceChildEdit:false,serviceChildDashBoard:true}),props.setFormView({...props.formView,Id:serviceData.ServiceId})}}/>
             </div>
             <div>
                 <div className={styles.serviceContainer}>
@@ -404,34 +378,6 @@ const ServiceEditForm=(props:any)=>{
                                 onSelectDate={(e)=>setServiceData({...serviceData,ServiceDate:new Date(e)})}
                             />
                         </div>
-                        <div>
-                            <label className={styles.labelTag}>Files</label>
-                            <input type="file" name='file' multiple onChange={(e)=>{fileUpload(e)}} disabled={viewAuthentication}/>
-                            <div>
-                                {
-                                    serviceData.Files.map((value,index)=>{
-                                        return(
-                                            <div key={index}>
-                                                <a href='#'>{value.Name}</a>
-                                                <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(value,index)} disabled={viewAuthentication}/>
-                                            </div>
-                                        )
-                                    })
-                                }
-                            </div>
-                            <div>
-                                {
-                                    serviceData.UpdateFiles.map((value,index)=>{
-                                        return(
-                                            <div key={index}>
-                                                <a href='#'>{value.name}</a>
-                                                <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleUpdateFileClose(index)} disabled={viewAuthentication}/>
-                                            </div>
-                                        )
-                                    })
-                                }
-                            </div>
-                        </div>
                         <div className={styles.serviceBox}>
                             <TextField label='Notes' value={serviceData.Notes} disabled={viewAuthentication} onChange={(e,text)=>setServiceData({...serviceData,Notes:text})} multiline style={{resize:'none'}}/>
                         </div>
@@ -440,11 +386,18 @@ const ServiceEditForm=(props:any)=>{
             </div>
             {!viewAuthentication &&
             <div className={styles.serviceBtn}>
-                <DefaultButton text='Update' onClick={()=>handleUpdate()}/>
-                <DefaultButton text='Cancel' onClick={()=>props.setChange({...props.change,servicesEdit:false,servicesDashBoard:true})} />
+                {btnAuthntication.BookConfirm && <DefaultButton text='B & C' onClick={()=>handleUpdate('BookConfirm')}/>}
+
+                {btnAuthntication.Complete && <DefaultButton text='Complete' onClick={()=>handleUpdate('Complete')}/>}
+
+                {btnAuthntication.Invoice && <DefaultButton text='Invoice' onClick={()=>handleUpdate('Invoice')}/>}
+
+                {btnAuthntication.InvoicePaid && <DefaultButton text='InvoicePaid' onClick={()=>handleUpdate('InvoicePaid')}/>}
+
+                <DefaultButton text='Cancel' onClick={()=>{props.setChange({...props.change,serviceChildEdit:false,serviceChildDashBoard:true}),props.setFormView({...props.formView,Id:serviceData.ServiceId})}} />
             </div>}
         </div>
     )
 }
 
-export default ServiceEditForm
+export default ServiceChildEditForm

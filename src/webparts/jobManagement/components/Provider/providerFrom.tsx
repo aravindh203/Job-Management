@@ -155,7 +155,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
             await sp.web.lists.getByTitle(props.list.listName).items.add(newJson)
             .then((result)=>{                                
                 createFolder(result.data.Id);
-                props.setChange({...props.change,provider:false,isSpinner:false})
+                props.setChange({...props.change,providerDashBoard:true,provider:false,isSpinner:false})
             })
             .catch(error=>{
                 errorFunction('add error',error);
@@ -187,15 +187,22 @@ const ProviderAddForm = (props:any):JSX.Element =>{
     const errorFunction=(name:string,error:any)=>{
         console.log(error,name);
         props.setChange({
+            providerDashBoard:false,
             provider:false,
             ProviderEdit:false,
+            clientDashBoard:false,
             client:false,
             clientEdit:false,
+            contructorDashBoard:false,
             contructor:false,
             conturctorEdit:false,
+            servicesDashBoard:false,
+            services:false,
+            servicesEdit:false,
             isError:true,
-            isSpinner:false
+            isSpinner:false,
         })
+        props.seterror(error)
     }
 
     useEffect(()=>{
@@ -207,7 +214,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
             <div className={styles.formContainer}>
                 <div className={styles.cancelBox}>
                     <h3>Provider Add Form</h3>
-                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,provider:false})}}/>
+                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,provider:false,providerDashBoard:true})}}/>
                 </div>
                 <div className={styles.formContent}>
                     <div className={styles.inputAlign}>

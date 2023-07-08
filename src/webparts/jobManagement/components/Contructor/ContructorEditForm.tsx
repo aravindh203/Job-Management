@@ -60,15 +60,22 @@ const ContructorEditForm = (props:any):JSX.Element =>{
     const handleError = (type:string,error:any):void =>{
         console.log(error)
         props.setChange({
+            providerDashBoard:false,
             provider:false,
             ProviderEdit:false,
+            clientDashBoard:false,
             client:false,
             clientEdit:false,
+            contructorDashBoard:false,
             contructor:false,
             conturctorEdit:false,
+            servicesDashBoard:false,
+            services:false,
+            servicesEdit:false,
             isError:true,
-            isSpinner:false
+            isSpinner:false,
         })
+        props.seterror(error)
     }
 
     const handleInputValue = (key:string,value:any):void =>{
@@ -178,7 +185,7 @@ const ContructorEditForm = (props:any):JSX.Element =>{
                     }
                 })
                 .catch(error=>handleError('get attachment folder',error))
-                props.setChange({...props.change,conturctorEdit:false,isSpinner:false})
+                props.setChange({...props.change,contructorDashBoard:true,conturctorEdit:false,isSpinner:false})
             })
             .catch(error=>{
                 handleError('Client update',error)
@@ -298,8 +305,8 @@ const ContructorEditForm = (props:any):JSX.Element =>{
         <div className={styles.contain}>
             <div className={styles.formContainer}>
                 <div className={styles.cancelBox}>
-                    <h3>Client {isViewAuthentication ? 'View':'Edit'} Form</h3>
-                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,conturctorEdit:false})}}/>
+                    <h3>Contructor {isViewAuthentication ? 'View':'Edit'} Form</h3>
+                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,conturctorEdit:false,contructorDashBoard:true})}}/>
                 </div>
                 <div className={styles.formContent}>
                     <div className={styles.inputAlign}>

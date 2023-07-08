@@ -59,15 +59,22 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     const handleError = (type:string,error:any):void =>{
         console.log(error)
         props.setChange({
+            providerDashBoard:false,
             provider:false,
             ProviderEdit:false,
+            clientDashBoard:false,
             client:false,
             clientEdit:false,
+            contructorDashBoard:false,
             contructor:false,
             conturctorEdit:false,
+            servicesDashBoard:false,
+            services:false,
+            servicesEdit:false,
             isError:true,
-            isSpinner:false
+            isSpinner:false,
         })
+        props.seterror(error)
     }
 
     const handleInputValue = (key:string,value:any):void =>{
@@ -177,7 +184,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
                     }
                 })
                 .catch(error=>handleError('get attachment folder',error))
-                props.setChange({...props.change,ProviderEdit:false,isSpinner:false})
+                props.setChange({...props.change,providerDashBoard:true,ProviderEdit:false,isSpinner:false})
             })
             .catch(error=>{
                 handleError('provider update',error)
@@ -297,7 +304,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             <div className={styles.formContainer}>
                 <div className={styles.cancelBox}>
                     <h3>Provider {isViewAuthentication ? 'View':'Edit'} Form</h3>
-                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,ProviderEdit:false})}}/>
+                    <IconButton iconProps={{ iconName: 'Cancel' }} title="Cancel" ariaLabel="Cancel" className={styles.cancelButton} onClick={()=>{props.setChange({...props.change,ProviderEdit:false,providerDashBoard:true})}}/>
                 </div>
                 <div className={styles.formContent}>
                     <div className={styles.inputAlign}>
