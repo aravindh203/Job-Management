@@ -48,7 +48,15 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             },
             ".ms-DetailsHeader-cellTitle":{
                 color:"#fff"
-            }
+            },
+            // ".ms-DetailsRow-fields":{
+            //     ".ms-DetailsRow-cell":{
+            //         ":nth-child(3)":{
+            //             background:'red',
+            //             animation: 'blink 1s infinite'
+            //         }
+            //     }
+            // }
         }
     }
 
@@ -125,7 +133,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             fieldName:'Status',
             name:'Status',
             minWidth:100,
-            maxWidth:150
+            maxWidth:150,
+            // onRender:(item)=>{
+            //     if(item.Status==='Approve'){
+            //         return <div className='rowcol'>{item.Status}</div>
+            //     }else{
+            //         return <div>{item.Status}</div>
+            //     }
+            // }
         },
         {
             key:'9',

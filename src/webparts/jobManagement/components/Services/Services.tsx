@@ -61,8 +61,6 @@ const Services = (props:any):JSX.Element=>{
         EndDate:'',
         RecurrenceDates:[]
     })    
-    console.log("servicwes",Service);
-    
     const [providerData,setProviderData]=React.useState<IData>({
         Name:'',
         PhoneNo:'',
@@ -224,6 +222,8 @@ const Services = (props:any):JSX.Element=>{
                 ServiceName:Service.serviceName ? Service.serviceName:'',
                 ServiceDate:Service.serviceDate ? Service.serviceDate:new Date(),
                 Notes:Service.serviceNotes ? Service.serviceNotes:'',
+                Recurrence:Service.Recurrence ? Service.Recurrence:false,
+                RecurrenceType:Service.RecurrenceType ? Service.RecurrenceType:'',
                 StartDate:Service.StartDate ? Service.StartDate:new Date(''),
                 EndDate:Service.EndDate ? Service.EndDate:new Date(''),
                 ProviderDetailsId:providerData.Id ? providerData.Id:null,
@@ -482,34 +482,35 @@ const Services = (props:any):JSX.Element=>{
                         <div className={styles.serviceBox}>
                             <TextField label='Notes' onChange={(e,text)=>setService({...Service,serviceNotes:text})} multiline style={{resize:'none'}}/>
                         </div>
-                        <div className={''}>
+                        <div>
                             <label className={styles.labelTag}>Recurrence</label>
                             <Checkbox checked={Service.Recurrence} label={Service.Recurrence ? 'Yes':'No'} onChange={(e,text)=>setService({...Service,Recurrence:text})}/>
                         </div>
                     </div>
                     <div>
-                    {Service.Recurrence &&
-                            <div className={styles.serviceContent}>
-                                <div className={styles.serviceBox}>
-                                    <Dropdown 
-                                        label='Select Recurrence Type'
-                                        options={Recurrence}
-                                        onChange={(e,item)=>setService({...Service,RecurrenceType:item.text})}/>
-                                </div>
-                                <div className={styles.serviceBox}>
-                                    <DatePicker 
-                                        label='Select Start Date'
-                                        onSelectDate={(e)=>setService({...Service,StartDate:moment(e).format('YYYY-MM-DD')})}
-                                    />
-                                </div>
-                                <div className={styles.serviceBox}>
-                                    <DatePicker 
-                                        label='Select End Date'
-                                        onSelectDate={(e)=>setService({...Service,EndDate:moment(e).format('YYYY-MM-DD')})}
-                                    />
-                                </div>
+                        <div className={styles.serviceContent}>
+                            <div className={styles.serviceBox}>
+                                <Dropdown 
+                                    label='Select Recurrence Type'
+                                    options={Recurrence}
+                                    disabled={!Service.Recurrence}
+                                    onChange={(e,item)=>setService({...Service,RecurrenceType:item.text})}/>
                             </div>
-                        }
+                            <div className={styles.serviceBox}>
+                                <DatePicker 
+                                    label='Select Start Date'
+                                    disabled={Service.RecurrenceType ? false:true}
+                                    onSelectDate={(e)=>setService({...Service,StartDate:moment(e).format('YYYY-MM-DD')})}
+                                />
+                            </div>
+                            <div className={styles.serviceBox}>
+                                <DatePicker 
+                                    label='Select End Date'
+                                    disabled={Service.RecurrenceType ? false:true}
+                                    onSelectDate={(e)=>setService({...Service,EndDate:moment(e).format('YYYY-MM-DD')})}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>   
             </div>

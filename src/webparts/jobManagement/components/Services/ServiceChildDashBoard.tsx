@@ -16,7 +16,8 @@ interface IData{
     Id:number;
 }
 const DashBoardComponent=(props:any):JSX.Element=>{ 
-   
+    const Statuses=['InProgess','BookConfirm','Complete','Invoice','InvoicePaid']
+    const userViewAuthentication=props.admin ? true:false    
     const list={
         root:{
             ".ms-DetailsHeader":{
@@ -43,8 +44,20 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             text:'InProgress'
         },
         {
+            key:'BookConfirm',
+            text:'BookConfirm'
+        },
+        {
             key:'Complete',
             text:'Complete'
+        },
+        {
+            key:'Invoice',
+            text:'Invoice'
+        },
+        {
+            key:'InvoicePaid',
+            text:'InvoicePaid'
         }
     ]
     
@@ -79,8 +92,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         minWidth:100,
         maxWidth:150,
         onRender:(item)=>{
-            // let userAuthentication= findUserAccess(item)  
-        return <IconButton iconProps={{ iconName: 'edit' }}  title="Edit" ariaLabel="Edit" onClick={()=>{viewEditHnadle(item,'edit')}}/>
+            let statusAuthentication= findStatusAccess(item)  
+        return <IconButton iconProps={{ iconName: 'edit' }} disabled={statusAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{viewEditHnadle(item,'edit')}}/>
         }
     },
     {
@@ -102,23 +115,23 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         displayItems:5,
     })
    
-    const findUserAccess=(item:any)=>{
+    const findStatusAccess=(item:any)=>{
         
-        let isEdit = true;
-
-        if( props.admin &&  (item.Status=="Draft" || item.Status=="Rejected") && item.CreatedBy==props.currentUser){
-            isEdit = false
-        }
-        else if(props.manager && item.Status!=='Draft' && item.Status!=='Rejected' && item.Status!=="Approve" ){
-            isEdit = false
+        let isEdit = false;
+        
+        if(Statuses.indexOf(item.Status)>0){
+            isEdit = true
         }
 
-        return isEdit
-
+        if(userViewAuthentication){
+            return isEdit
+        }else{
+            return true
+        }
     }
     
     const getServiceData=async()=>{        
-        await sp.web.lists.getByTitle('ServiceChild').items.select('*').orderBy('Modified',false).filter('ServiceId eq'+"'"+props.formView.Id+"'").get().then((data)=>{
+        await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter('ServiceId eq'+"'"+props.formView.Id+"'").get().then((data)=>{
             let masterData:IData[]=[];
             if(data.length){
                 data.forEach((item)=>{
@@ -150,8 +163,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             if(filter==="InProgress"){
                 return value.Status==='InProgress'
             }
-            else if(filter==='Complete'){
+            else if(filter==='BookConfirm'){
+                return value.Status==='BookConfirm'
+            }else if(filter==='Complete'){
                 return value.Status==='Complete'
+            }else if(filter==='Invoice'){
+                return value.Status==='Invoice'
+            }else if(filter==='InvoicePaid'){
+                return value.Status==='InvoicePaid'
             }
             else{
                 return value

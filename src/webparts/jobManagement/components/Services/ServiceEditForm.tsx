@@ -2,7 +2,7 @@ import * as React from 'react';
 import { sp} from "@pnp/sp/presets/all";
 import * as moment from 'moment';
 import styles from './Services.module.scss'
-import { DatePicker, DefaultButton, Dropdown, IDropdownOption, IconButton, TextField } from '@fluentui/react';
+import { Checkbox, DatePicker, DefaultButton, Dropdown, IDropdownOption, IconButton, TextField } from '@fluentui/react';
 
 interface IData{
     Name:string;
@@ -32,6 +32,19 @@ const ServiceEditForm=(props:any)=>{
         key:'Vessel Washing',
         text:'Vessel Washing'
     }]
+    const Recurrence:IDropdownOption[]=[{
+        key:'Daily',
+        text:'Daily'
+    },{
+        key:'Weekly',
+        text:'Weekly'
+    },{
+        key:'Monthly',
+        text:'Monthly'
+    },{
+        key:'Yearly',
+        text:'Yearly'
+    }]
     const [providerDropDown,setProviderDropDown]=React.useState<IDropdownOption[]>([])
     const [clientrDropDown,setClientDropDown]=React.useState<IDropdownOption[]>([])
     const [contructorDropDown,setContructorDropDown]=React.useState<IDropdownOption[]>([])
@@ -43,11 +56,17 @@ const ServiceEditForm=(props:any)=>{
         Files:[],
         UpdateFiles:[],
         DeleteFiles:[],
+        Recurrence:false,
+        RecurrenceType:'',
+        StartDate:new Date(''),
+        EndDate:new Date(''),
+        RecurrenceDates:[],
         ProviderId:null,
         ClientId:null,
         ContructorId:null,
         ServiceId:null
-    })
+    })    
+    const [newServiceData,setNewServiceData]=React.useState(null)
     const [providerData,setProviderData]=React.useState<IData>({
         Name:'',
         PhoneNo:'',
@@ -72,7 +91,6 @@ const ServiceEditForm=(props:any)=>{
         SecondAddress:'',
         Id:null
     })
-    
     const getProviderDropData=async()=>{
         await sp.web.lists.getByTitle('ProviderList').items.select('id,ProviderName,Status').filter('Status eq ' + "'" + approve + "'").get().then((items)=>{
             if(items){
@@ -120,10 +138,22 @@ const ServiceEditForm=(props:any)=>{
             } 
         }).catch((error)=>errorFunction("get contructor data",error))
     }
+    const findInsertData=()=>{
+        
+        let update
+        
+        if(newServiceData.RecurrenceType != serviceData.RecurrenceType || newServiceData.StartDate.toString() != serviceData.StartDate.toString() || newServiceData.EndDate.toString() != serviceData.EndDate.toString() || newServiceData.Recurrence != serviceData.Recurrence){
+            update=true
+        }
+        else if(newServiceData.ServiceDate !== serviceData.ServiceDate || newServiceData.Notes !== serviceData.Notes || serviceData.DeleteFiles.length > 0 || serviceData.UpdateFiles.length > 0){
+            update=false
+        }
+        return update
 
+    }
     const getServicesdata=async()=>{
        
-        await sp.web.lists.getByTitle(props.list.listName).items.select('ServiceName,ServiceDate,Notes,Status,ProviderDetailsId,ClientDetailsId,ContrctDetailsId').getById(props.formView.Id).get().then(async(result)=>{
+        await sp.web.lists.getByTitle(props.list.listName).items.select('ServiceName,ServiceDate,StartDate,EndDate,Recurrence,RecurrenceType,Notes,Status,ProviderDetailsId,ClientDetailsId,ContrctDetailsId').getById(props.formView.Id).get().then(async(result)=>{
             if(result){                
                 await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.select('*').filter('Name eq'+"'"+result.Id+"'").get().then(async(res)=>{
                     await sp.web.getFolderByServerRelativePath(res[0].ServerRelativeUrl).files.get().then((item)=>{
@@ -135,10 +165,27 @@ const ServiceEditForm=(props:any)=>{
                             Files:item ? item:[],
                             UpdateFiles:[],
                             DeleteFiles:[],
+                            Recurrence:result.Recurrence ?result.Recurrence:false,
+                            RecurrenceType:result.RecurrenceType ? result.RecurrenceType:'',
+                            StartDate:result.StartDate ? new Date(result.StartDate):new Date(''),
+                            EndDate:result.EndDate ? new Date(result.EndDate):new Date(''),
+                            RecurrenceDates:[],
                             ProviderId:result.ProviderDetailsId ? result.ProviderDetailsId:null,
                             ClientId:result.ClientDetailsId ? result.ClientDetailsId:null,
                             ContructorId:result.ContrctDetailsId ? result.ContrctDetailsId:null,
                             ServiceId:result.Id ? result.Id:null
+                        })
+                        setNewServiceData({
+                            ServiceDate:result.ServiceDate ? new Date(result.ServiceDate):new Date(),
+                            Notes:result.Notes ?result.Notes:'',
+                            Status:result.Status ? result.Status:'',
+                            Files:item ? item:[],
+                            UpdateFiles:[],
+                            DeleteFiles:[],
+                            Recurrence:result.Recurrence ?result.Recurrence:false,
+                            RecurrenceType:result.RecurrenceType ? result.RecurrenceType:'',
+                            StartDate:result.StartDate ? new Date(result.StartDate):new Date(''),
+                            EndDate:result.EndDate ? new Date(result.EndDate):new Date(''),
                         })
                     }).catch((error)=>errorFunction(error,'get files data'))
                 }).catch((error)=>errorFunction(error,'get folder data'))
@@ -192,9 +239,53 @@ const ServiceEditForm=(props:any)=>{
         }
     }
     const handleUpdate=async()=>{
-        if(serviceData.ServiceId){
-            props.setChange({...props.change,servicesEdit:false,isSpinner:true})
+        let updateResult=findInsertData()
+        props.setChange({...props.change,servicesEdit:false,isSpinner:true})
+       // if(serviceData.ServiceId){
+        //     props.setChange({...props.change,servicesEdit:false,isSpinner:true})
             
+        //     let testJson = {
+        //         ServiceName:serviceData.ServiceName ? serviceData.ServiceName:'',
+        //         ServiceDate:serviceData.ServiceDate ? serviceData.ServiceDate:new Date(),
+        //         Notes:serviceData.Notes ? serviceData.Notes:'',
+        //         ProviderDetailsId:serviceData.ProviderId ? serviceData.ProviderId:null,
+        //         ClientDetailsId:serviceData.ClientId ? serviceData.ClientId:null,
+        //         ContrctDetailsId:serviceData.ContructorId ? serviceData.ContructorId:null,
+        //     }
+
+        //     await sp.web.lists.getByTitle(props.list.listName).items.getById(serviceData.ServiceId).update(testJson).then(async(response)=>{
+        //         await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.filter('Name eq ' + "'" + serviceData.ServiceId + "'").get()
+        //         .then(async(results)=>{
+        //             for(let i=0;i<serviceData.DeleteFiles.length;i++){
+        //                 await sp.web.getFileByServerRelativePath(serviceData.DeleteFiles[i].ServerRelativeUrl).delete()
+        //                 .then(res=>console.log('del response',res))
+        //                 .catch(error=>errorFunction('attachement delete',error))
+        //             }
+        //             for(let k=0;k<serviceData.UpdateFiles.length;k++){
+        //                 await sp.web.getFolderByServerRelativePath(results[0].ServerRelativeUrl)
+        //                 .files.addUsingPath(serviceData.UpdateFiles[k].name,serviceData.UpdateFiles[k], { Overwrite: true })
+        //                 .then(result=>console.log('data updated succesfully'))
+        //                 .catch(error=>errorFunction('attachment update',error))
+        //             }
+        //             props.setChange({...props.change,servicesDashBoard:true,servicesEdit:false,isSpinner:false})
+        //         }).catch((error)=>errorFunction(error,'update folder'))
+        //     }).catch((error)=>errorFunction(error,'update service data'))
+        // }
+
+        if(updateResult){
+            await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+serviceData.ServiceId+"'"+"and Status eq"+"'"+'InProgress'+"'").get().then(async(data)=>{
+                if(data.length){    
+                    for(let i=0;i<data.length;i++){
+                        let json={...data[i],Status:'Cancel'}
+                        await sp.web.lists.getByTitle('ServiceChild').items.getById(data[i].Id).update(json).then((result)=>{
+                        }).catch((error)=>errorFunction(error,'update child cancel'))
+                    }
+                }     
+                addNewServiceData()           
+            }).catch((error)=>errorFunction(error, 'update get service child data'))
+        }else if(!updateResult){ 
+                       
+            props.setChange({...props.change,servicesEdit:false,isSpinner:true})
             let testJson = {
                 ServiceName:serviceData.ServiceName ? serviceData.ServiceName:'',
                 ServiceDate:serviceData.ServiceDate ? serviceData.ServiceDate:new Date(),
@@ -203,7 +294,6 @@ const ServiceEditForm=(props:any)=>{
                 ClientDetailsId:serviceData.ClientId ? serviceData.ClientId:null,
                 ContrctDetailsId:serviceData.ContructorId ? serviceData.ContructorId:null,
             }
-
             await sp.web.lists.getByTitle(props.list.listName).items.getById(serviceData.ServiceId).update(testJson).then(async(response)=>{
                 await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.filter('Name eq ' + "'" + serviceData.ServiceId + "'").get()
                 .then(async(results)=>{
@@ -218,9 +308,84 @@ const ServiceEditForm=(props:any)=>{
                         .then(result=>console.log('data updated succesfully'))
                         .catch(error=>errorFunction('attachment update',error))
                     }
+                    serviceChildUpdateData()
                     props.setChange({...props.change,servicesDashBoard:true,servicesEdit:false,isSpinner:false})
                 }).catch((error)=>errorFunction(error,'update folder'))
             }).catch((error)=>errorFunction(error,'update service data'))
+        }else{
+            props.setChange({...props.change,servicesDashBoard:true,servicesEdit:false,isSpinner:false})
+        }
+    }
+    const serviceChildUpdateData=async()=>{
+        await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+serviceData.ServiceId+"'"+"and Status eq"+"'"+'InProgress'+"'").get().then(async(result)=>{
+            let testJson = {
+                ServiceName:serviceData.ServiceName ? serviceData.ServiceName:'',
+                ServiceDate:serviceData.ServiceDate ? serviceData.ServiceDate:new Date(),
+                Notes:serviceData.Notes ? serviceData.Notes:'',
+                ProviderDetailsId:serviceData.ProviderId ? serviceData.ProviderId:null,
+                ClientDetailsId:serviceData.ClientId ? serviceData.ClientId:null,
+                ContrctDetailsId:serviceData.ContructorId ? serviceData.ContructorId:null,
+            }
+            for(let i=0;i<result.length;i++){
+                await sp.web.lists.getByTitle('ServiceChild').items.getById(result[i].Id).update(testJson).then((data)=>{
+
+                }).catch((error)=>errorFunction(error,'child service update'))
+            }
+        })
+    }
+    const addNewServiceData=async()=>{
+        
+        let Json={
+            ServiceName:serviceData.ServiceName ? serviceData.ServiceName:'',
+            ServiceDate:serviceData.ServiceDate ? serviceData.ServiceDate:new Date(),
+            Notes:serviceData.Notes ? serviceData.Notes:'',
+            Recurrence:serviceData.Recurrence ? serviceData.Recurrence:false,
+            RecurrenceType:serviceData.RecurrenceType ? serviceData.RecurrenceType:'',
+            StartDate:serviceData.StartDate ? serviceData.StartDate:new Date(''),
+            EndDate:serviceData.EndDate ? serviceData.EndDate:new Date(''),
+            ProviderDetailsId:providerData.Id ? providerData.Id:null,
+            ClientDetailsId:clientData.Id ? clientData.Id:null,
+            ContrctDetailsId:contructorData.Id ? contructorData.Id:null,
+            Status:"InProgress"
+        }
+        await sp.web.lists.getByTitle("Services").items.add(Json).then(async(item)=>{
+            if(serviceData.RecurrenceDates.length){
+                for(let i=0;i<serviceData.RecurrenceDates.length;i++){
+                    let Json={
+                        ServiceId:item.data.Id ? item.data.Id:null,
+                        ServiceName:serviceData.ServiceName ? serviceData.ServiceName:'',
+                        ServiceDate:serviceData.RecurrenceDates[i] ? serviceData.RecurrenceDates[i]:'',
+                        Notes:serviceData.Notes ? serviceData.Notes:'',
+                        ProviderDetailsId:providerData.Id ? providerData.Id:null,
+                        ClientDetailsId:clientData.Id ? clientData.Id:null,
+                        ContrctDetailsId:contructorData.Id ? contructorData.Id:null,
+                        Status:"InProgress"
+                    }
+                    await sp.web.lists.getByTitle("ServiceChild").items.add(Json).then((item)=>{
+                    }).catch((error)=>errorFunction("add services  recurrence data",error))
+                }
+            }
+            createFolder(item.data.Id) 
+        }).catch((error)=>errorFunction("add services data",error))
+    }
+    const createFolder=async(itemId)=>{
+        if(itemId){
+            await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.addUsingPath(itemId.toString(),true).then(async(result)=>{
+                                
+                if(serviceData.Files.length >0){
+                    for(let i=0;i<serviceData.Files.length;i++){
+                        await sp.web.getFolderByServerRelativePath(result.data.ServerRelativeUrl).files.addUsingPath(serviceData.Files[i].Name, serviceData.Files[i], { Overwrite: true }).then((res)=>{
+                        }).catch((error)=>errorFunction("file error",error))
+                    }
+                }
+                if(serviceData.UpdateFiles.length >0){
+                    for(let i=0;i<serviceData.UpdateFiles.length;i++){
+                        await sp.web.getFolderByServerRelativePath(result.data.ServerRelativeUrl).files.addUsingPath(serviceData.UpdateFiles[i].name, serviceData.UpdateFiles[i], { Overwrite: true }).then((res)=>{
+                        }).catch((error)=>errorFunction("file error",error))
+                    }
+                }   
+                props.setChange({...props.change,servicesEdit:false,servicesDashBoard:true,isSpinner:false})
+            }).catch((error)=>errorFunction("folder error",error))
         }
     }
     const fileUpload=(event)=>{
@@ -251,6 +416,41 @@ const ServiceEditForm=(props:any)=>{
     const dateformat=(date:Date):string=>{
         return moment(date).format("YYYY/MM/DD")
     }
+    const getBetweenDates=(startDate, endDate)=> {
+               
+        let dates = [];
+            while (startDate <= endDate) {
+                dates.push(new Date(startDate));
+                startDate.setDate(startDate.getDate() + 1);
+            } 
+            setServiceData({...serviceData,RecurrenceDates:[...dates]})
+    }
+    const getWeeklyDates=(startDate, endDate)=> {
+        let dates = []; 
+        while (startDate <= endDate) {
+          dates.push(new Date(startDate));
+          startDate.setDate(startDate.getDate()+7)
+        }
+      
+        setServiceData({...serviceData,RecurrenceDates:[...dates]})
+    }
+    const getMonthDates=(startDate, endDate)=>{
+        let dates=[]
+        while(startDate<=new Date(endDate)){
+            dates.push(new Date(startDate))
+            startDate.setMonth(startDate.getMonth()+1)
+        }  
+        setServiceData({...serviceData,RecurrenceDates:[...dates]})      
+    }
+    const getYearDates=(startDate, endDate)=>{
+        let dates=[]
+        while(startDate<=new Date(endDate)){
+            dates.push(new Date(startDate))
+            startDate.setFullYear(startDate.getFullYear()+1)
+        }  
+        setServiceData({...serviceData,RecurrenceDates:[...dates]})      
+    }
+    
     const errorFunction=(error,name)=>{
         console.log(error,name)  
         props.setChange({
@@ -271,7 +471,18 @@ const ServiceEditForm=(props:any)=>{
         })   
         props.seterror(error)  
     }
-
+    React.useEffect(()=>{
+        if(serviceData.RecurrenceType==='Daily'){
+            getBetweenDates(new Date(serviceData.StartDate),new Date(serviceData.EndDate))
+        }else if(serviceData.RecurrenceType==='Weekly'){
+            getWeeklyDates(new Date(serviceData.StartDate),new Date(serviceData.EndDate))
+        }else if(serviceData.RecurrenceType==='Monthly'){
+            getMonthDates(new Date(serviceData.StartDate),new Date(serviceData.EndDate))
+        }else if(serviceData.RecurrenceType==='Yearly'){
+            getYearDates(new Date(serviceData.StartDate),new Date(serviceData.EndDate))
+        }
+        
+    },[serviceData.RecurrenceType,serviceData.StartDate,serviceData.EndDate])
     React.useEffect(()=>{
         if(props.formView.authentication){
             getServicesdata()
@@ -297,7 +508,7 @@ const ServiceEditForm=(props:any)=>{
                                 label="Select Provider"
                                 options={providerDropDown}
                                 selectedKey={providerData.Id}
-                                disabled={viewAuthentication}
+                                disabled={true}
                                 onChange={(e,item)=>setServiceData({...serviceData,ProviderId:item.key})}
                             />
                         </div>
@@ -328,7 +539,7 @@ const ServiceEditForm=(props:any)=>{
                                 label="Select Client"
                                 options={clientrDropDown}
                                 selectedKey={clientData.Id}
-                                disabled={viewAuthentication}
+                                disabled={true}
                                 onChange={(e,item)=>setServiceData({...serviceData,ClientId:item.key})}
                             />
                         </div>
@@ -359,7 +570,7 @@ const ServiceEditForm=(props:any)=>{
                                 label="Select Contructor"
                                 options={contructorDropDown}
                                 selectedKey={contructorData.Id}
-                                disabled={viewAuthentication}
+                                disabled={true}
                                 onChange={(e,item)=>setServiceData({...serviceData,ContructorId:item.key})}
                             />
                         </div>
@@ -391,7 +602,7 @@ const ServiceEditForm=(props:any)=>{
                                 label='Select Services'
                                 options={services}
                                 selectedKey={serviceData.ServiceName}
-                                disabled={viewAuthentication}
+                                disabled={true}
                                 onChange={(e,item)=>setServiceData({...serviceData,ServiceName:item.text})}
                             />
                         </div>
@@ -435,8 +646,40 @@ const ServiceEditForm=(props:any)=>{
                         <div className={styles.serviceBox}>
                             <TextField label='Notes' value={serviceData.Notes} disabled={viewAuthentication} onChange={(e,text)=>setServiceData({...serviceData,Notes:text})} multiline style={{resize:'none'}}/>
                         </div>
+                        <div>
+                            <label className={styles.labelTag}>Recurrence</label>
+                            <Checkbox checked={serviceData.Recurrence} label={serviceData.Recurrence ? 'Yes':'No'} disabled={viewAuthentication} onChange={(e,text)=>setServiceData({...serviceData,Recurrence:text})}/>
+                        </div>
                     </div>
-                </div>   
+                    <div> 
+                        <div className={styles.serviceContent}>
+                            <div className={styles.serviceBox}>
+                                <Dropdown 
+                                    label='Select Recurrence Type'
+                                    options={Recurrence}
+                                    selectedKey={serviceData.Recurrence ? serviceData.RecurrenceType:''}
+                                    disabled={viewAuthentication ? viewAuthentication:!serviceData.Recurrence}
+                                    onChange={(e,item)=>setServiceData({...serviceData,RecurrenceType:item.text})}/>
+                            </div>
+                            <div className={styles.serviceBox}>
+                                <DatePicker 
+                                    label='Select Start Date'
+                                    value={serviceData.StartDate}
+                                    disabled={viewAuthentication ? viewAuthentication:serviceData.Recurrence ? serviceData.RecurrenceType ? false:true:true}
+                                    onSelectDate={(e)=>setServiceData({...serviceData,StartDate:new Date(e)})}
+                                />
+                            </div>
+                            <div className={styles.serviceBox}>
+                                <DatePicker 
+                                    label='Select End Date'
+                                    value={serviceData.EndDate}
+                                    disabled={viewAuthentication ? viewAuthentication:serviceData.Recurrence ? serviceData.RecurrenceType ? false:true:true}
+                                    onSelectDate={(e)=>setServiceData({...serviceData,EndDate:new Date(e)})}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>  
             </div>
             {!viewAuthentication &&
             <div className={styles.serviceBtn}>
