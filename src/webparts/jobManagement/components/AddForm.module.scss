@@ -45,3 +45,16 @@
         margin: 0;
     }
 }
+
+@keyframes blink {
+    0% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: #ffff00;
+        /* Change to the desired background color */
+    }
+    100% {
+        background-color: transparent;
+    }
+}

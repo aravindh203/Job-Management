@@ -15,7 +15,7 @@ interface IData{
 const ServiceChildEditForm=(props:any)=>{
     let approve:string='Approve'
     let viewAuthentication=props.formView.status=='view' ? true:false
-   
+
     const services:IDropdownOption[]=[{
         key:'House Cleaning',
         text:"House Cleaning"
@@ -76,9 +76,7 @@ const ServiceChildEditForm=(props:any)=>{
         InvoicePaid:false,
     })
 
-    const findStatus=()=>{
-       console.log('statsus',serviceData.Status);
-       
+    const findStatus=()=>{       
         if(serviceData.Status==='InProgress'){
             setBtnAuthendication({...btnAuthntication,BookConfirm:true})
         }else if(serviceData.Status==='BookConfirm'){
@@ -271,7 +269,7 @@ const ServiceChildEditForm=(props:any)=>{
                                 label="Select Provider"
                                 options={providerDropDown}
                                 selectedKey={providerData.Id}
-                                disabled={viewAuthentication}
+                                disabled={true}
                                 onChange={(e,item)=>setServiceData({...serviceData,ProviderId:item.key})}
                             />
                         </div>
@@ -302,7 +300,7 @@ const ServiceChildEditForm=(props:any)=>{
                                 label="Select Client"
                                 options={clientrDropDown}
                                 selectedKey={clientData.Id}
-                                disabled={viewAuthentication}
+                                disabled={true}
                                 onChange={(e,item)=>setServiceData({...serviceData,ClientId:item.key})}
                             />
                         </div>
@@ -365,7 +363,7 @@ const ServiceChildEditForm=(props:any)=>{
                                 label='Select Services'
                                 options={services}
                                 selectedKey={serviceData.ServiceName}
-                                disabled={viewAuthentication}
+                                disabled={true}
                                 onChange={(e,item)=>setServiceData({...serviceData,ServiceName:item.text})}
                             />
                         </div>

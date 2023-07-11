@@ -6,7 +6,6 @@ import styles from './../AddForm.module.scss'
 import { Pagination } from "@pnp/spfx-controls-react/lib/pagination";
 import * as moment from 'moment';
 
-
 interface IData{
     ServiceName:string;
     ServiceDate:string;
@@ -18,7 +17,7 @@ interface IData{
 }
 const DashBoardComponent=(props:any):JSX.Element=>{ 
 
-    const addFormViewFlag=props.admin && props.manager ? true:props.admin ? true:false
+    const userViewAuthentication=props.admin ? true:false
     const addIcon={
         root:{
             ".ms-Button-icon":{
@@ -58,8 +57,20 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             text:'InProgress'
         },
         {
+            key:'BookConfirm',
+            text:'BookConfirm'
+        },
+        {
             key:'Complete',
             text:'Complete'
+        },
+        {
+            key:'Invoice',
+            text:'Invoice'
+        },
+        {
+            key:'InvoicePaid',
+            text:'InvoicePaid'
         }
     ]
     
@@ -106,8 +117,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         minWidth:100,
         maxWidth:150,
         onRender:(item)=>{
-            // let userAuthentication= findUserAccess(item)  
-        return <IconButton iconProps={{ iconName: 'edit' }}  title="Edit" ariaLabel="Edit" onClick={()=>{viewEditHnadle(item,'edit')}}/>
+            let userAuthentication= findUserAccess(item)  
+        return <IconButton iconProps={{ iconName: 'edit' }} disabled={userAuthentication} title="Edit" ariaLabel="Edit" onClick={()=>{viewEditHnadle(item,'edit')}}/>
         }
     },
     {
@@ -127,6 +138,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }]
 
     const [MData,setMData] = useState<IData[]>([])
+    const [childMData,setChildMData]=useState([])
     const [filter,setFilter] = useState<string>('All')
     const [filterData,setFilterData] = useState([]) 
     const [pageFilter,setPageFilter] = useState([])
@@ -138,20 +150,37 @@ const DashBoardComponent=(props:any):JSX.Element=>{
    
     const findUserAccess=(item:any)=>{
         
-        let isEdit = true;
-
-        if( props.admin &&  (item.Status=="Draft" || item.Status=="Rejected") && item.CreatedBy==props.currentUser){
-            isEdit = false
+        let isEdit = false;
+        if(childMData.length > 0){
+            let master=[...childMData].filter((value=>value.ServiceId===item.Id))
+            if(master.length > 0 ){
+                if(master.every((value)=>value.Status==='InvoicePaid') || master.some((value)=>value.Status==='InvoicePaid')){
+                    item.Status='InvoicePaid'
+                    isEdit=true
+                } else if(master.every((value)=>value.Status==='Invoice') || master.some((value)=>value.Status==='Invoice')){
+                    item.Status='Invoice'
+                    isEdit=true
+                }else if(master.every((value)=>value.Status==='Complete') || master.some((value)=>value.Status==='Complete')){
+                    item.Status='Complete'
+                } else if(master.every((value)=>value.Status==='BookConfirm') || master.some((value)=>value.Status==='BookConfirm')){
+                    item.Status='BookConfirm'
+                } else if(master.every((value)=>value.Status==='InProgress') || master.some((value)=>value.Status==='InProgress')){
+                    item.Status='InProgress'
+                }
+            }            
         }
-        else if(props.manager && item.Status!=='Draft' && item.Status!=='Rejected' && item.Status!=="Approve" ){
-            isEdit = false
+        if(userViewAuthentication){
+            return isEdit
+        }else{
+            return true
         }
-
-        return isEdit
-
     }
     
-    
+    const findStatus=async()=>{              
+        await sp.web.lists.getByTitle('ServiceChild').items.select('*').orderBy('Modified',false).get().then((data)=>{
+            setChildMData(data)
+        }).catch((error)=>{errorFunction(error,'get child data')})
+    }
     const getServiceData=async()=>{
 
         await sp.web.lists.getByTitle(props.list.listName).items.select('*').orderBy('Modified',false).get().then((data)=>{
@@ -164,7 +193,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                         StartDate: item.StartDate ? moment(item.StartDate).format('YYYY/MM/DD'):'',
                         EndDate: item.EndDate ? moment(item.EndDate).format('YYYY/MM/DD'):'',
                         Notes: item.Notes ? item.Notes:'',
-                        Status: item.Status ? item.Status:'',
+                        Status: item.Status ? item.Status:'' ,
                         Id: item.Id ? item.Id :null
                     })
                 })
@@ -174,7 +203,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 setMData([])
                 setPageFilter([])
             }
-            
+            findStatus()
         }).catch((error)=>{
             errorFunction(error,"get Services Data")
         })
@@ -187,8 +216,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             if(filter==="InProgress"){
                 return value.Status==='InProgress'
             }
-            else if(filter==='Complete'){
+            else if(filter==='BookConfirm'){
+                return value.Status==='BookConfirm'
+            }else if(filter==='Complete'){
                 return value.Status==='Complete'
+            }else if(filter==='Invoice'){
+                return value.Status==='Invoice'
+            }else if(filter==='InvoicePaid'){
+                return value.Status==='InvoicePaid'
             }
             else{
                 return value
@@ -308,7 +343,6 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     useEffect(()=>{
         getPagination()
     },[pagination,pageFilter])
-    
     useEffect(()=>{
         getServiceData()
     },[])
@@ -331,7 +365,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                         <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)} disableAnimation/>
                     </div>
                     {
-                        addFormViewFlag ? <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />:null
+                        userViewAuthentication ? <CommandBarButton text='New' iconProps={{iconName:'add'}} className={styles.newButton} styles={addIcon} onClick={()=>handlePageChange()} />:null
                     }
                 </div>
             </div>
