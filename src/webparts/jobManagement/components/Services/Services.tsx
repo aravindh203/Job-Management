@@ -248,6 +248,20 @@ const Services = (props:any):JSX.Element=>{
                         }).catch((error)=>errorFunction("add services  recurrence data",error))
                     }
                 }
+                else{
+                    let Json={
+                        ServiceId:item.data.Id ? item.data.Id:null,
+                        ServiceName:Service.serviceName ? Service.serviceName:'',
+                        ServiceDate:Service.serviceDate ? Service.serviceDate:'',
+                        Notes:Service.serviceNotes ? Service.serviceNotes:'',
+                        ProviderDetailsId:providerData.Id ? providerData.Id:null,
+                        ClientDetailsId:clientData.Id ? clientData.Id:null,
+                        ContrctDetailsId:contructorData.Id ? contructorData.Id:null,
+                        Status:"InProgress"
+                    }
+                    await sp.web.lists.getByTitle("ServiceChild").items.add(Json).then((item)=>{
+                    }).catch((error)=>errorFunction("add services  recurrence data",error))
+                }
                 createFolder(item.data.Id) 
             }).catch((error)=>errorFunction("add services data",error))
         }

@@ -151,23 +151,8 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     const findUserAccess=(item:any)=>{
         
         let isEdit = false;
-        if(childMData.length > 0){
-            let master=[...childMData].filter((value=>value.ServiceId===item.Id))
-            if(master.length > 0 ){
-                if(master.every((value)=>value.Status==='InvoicePaid') || master.some((value)=>value.Status==='InvoicePaid')){
-                    item.Status='InvoicePaid'
-                    isEdit=true
-                } else if(master.every((value)=>value.Status==='Invoice') || master.some((value)=>value.Status==='Invoice')){
-                    item.Status='Invoice'
-                    isEdit=true
-                }else if(master.every((value)=>value.Status==='Complete') || master.some((value)=>value.Status==='Complete')){
-                    item.Status='Complete'
-                } else if(master.every((value)=>value.Status==='BookConfirm') || master.some((value)=>value.Status==='BookConfirm')){
-                    item.Status='BookConfirm'
-                } else if(master.every((value)=>value.Status==='InProgress') || master.some((value)=>value.Status==='InProgress')){
-                    item.Status='InProgress'
-                }
-            }            
+        if(item.Status==='Canceled'){
+            isEdit=true
         }
         if(userViewAuthentication){
             return isEdit
