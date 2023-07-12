@@ -167,8 +167,8 @@ const ServiceEditForm=(props:any)=>{
                             DeleteFiles:[],
                             Recurrence:result.Recurrence ?result.Recurrence:false,
                             RecurrenceType:result.RecurrenceType ? result.RecurrenceType:'',
-                            StartDate:result.StartDate ? new Date(result.StartDate):new Date(''),
-                            EndDate:result.EndDate ? new Date(result.EndDate):new Date(''),
+                            StartDate:result.StartDate ? new Date(result.StartDate):new Date(),
+                            EndDate:result.EndDate ? new Date(result.EndDate):new Date(),
                             RecurrenceDates:[],
                             ProviderId:result.ProviderDetailsId ? result.ProviderDetailsId:null,
                             ClientId:result.ClientDetailsId ? result.ClientDetailsId:null,
@@ -184,8 +184,8 @@ const ServiceEditForm=(props:any)=>{
                             DeleteFiles:[],
                             Recurrence:result.Recurrence ?result.Recurrence:false,
                             RecurrenceType:result.RecurrenceType ? result.RecurrenceType:'',
-                            StartDate:result.StartDate ? new Date(result.StartDate):new Date(''),
-                            EndDate:result.EndDate ? new Date(result.EndDate):new Date(''),
+                            StartDate:result.StartDate ? new Date(result.StartDate):new Date(),
+                            EndDate:result.EndDate ? new Date(result.EndDate):new Date(),
                         })
                     }).catch((error)=>errorFunction(error,'get files data'))
                 }).catch((error)=>errorFunction(error,'get folder data'))
@@ -241,46 +241,17 @@ const ServiceEditForm=(props:any)=>{
     const handleUpdate=async()=>{
         let updateResult=findInsertData()
         props.setChange({...props.change,servicesEdit:false,isSpinner:true})
-       // if(serviceData.ServiceId){
-        //     props.setChange({...props.change,servicesEdit:false,isSpinner:true})
-            
-        //     let testJson = {
-        //         ServiceName:serviceData.ServiceName ? serviceData.ServiceName:'',
-        //         ServiceDate:serviceData.ServiceDate ? serviceData.ServiceDate:new Date(),
-        //         Notes:serviceData.Notes ? serviceData.Notes:'',
-        //         ProviderDetailsId:serviceData.ProviderId ? serviceData.ProviderId:null,
-        //         ClientDetailsId:serviceData.ClientId ? serviceData.ClientId:null,
-        //         ContrctDetailsId:serviceData.ContructorId ? serviceData.ContructorId:null,
-        //     }
-
-        //     await sp.web.lists.getByTitle(props.list.listName).items.getById(serviceData.ServiceId).update(testJson).then(async(response)=>{
-        //         await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.filter('Name eq ' + "'" + serviceData.ServiceId + "'").get()
-        //         .then(async(results)=>{
-        //             for(let i=0;i<serviceData.DeleteFiles.length;i++){
-        //                 await sp.web.getFileByServerRelativePath(serviceData.DeleteFiles[i].ServerRelativeUrl).delete()
-        //                 .then(res=>console.log('del response',res))
-        //                 .catch(error=>errorFunction('attachement delete',error))
-        //             }
-        //             for(let k=0;k<serviceData.UpdateFiles.length;k++){
-        //                 await sp.web.getFolderByServerRelativePath(results[0].ServerRelativeUrl)
-        //                 .files.addUsingPath(serviceData.UpdateFiles[k].name,serviceData.UpdateFiles[k], { Overwrite: true })
-        //                 .then(result=>console.log('data updated succesfully'))
-        //                 .catch(error=>errorFunction('attachment update',error))
-        //             }
-        //             props.setChange({...props.change,servicesDashBoard:true,servicesEdit:false,isSpinner:false})
-        //         }).catch((error)=>errorFunction(error,'update folder'))
-        //     }).catch((error)=>errorFunction(error,'update service data'))
-        // }
-
+       
         if(updateResult){
             await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+serviceData.ServiceId+"'"+"and Status eq"+"'"+'InProgress'+"'").get().then(async(data)=>{
                 if(data.length){    
                     for(let i=0;i<data.length;i++){
-                        let json={...data[i],Status:'Cancel'}
+                        let json={...data[i],Status:'Decline'}
                         await sp.web.lists.getByTitle('ServiceChild').items.getById(data[i].Id).update(json).then((result)=>{
                         }).catch((error)=>errorFunction(error,'update child cancel'))
                     }
                 }     
+                serviceStatusChange()
                 addNewServiceData()           
             }).catch((error)=>errorFunction(error, 'update get service child data'))
         }else if(!updateResult){ 
@@ -295,7 +266,7 @@ const ServiceEditForm=(props:any)=>{
                 ContrctDetailsId:serviceData.ContructorId ? serviceData.ContructorId:null,
             }
             await sp.web.lists.getByTitle(props.list.listName).items.getById(serviceData.ServiceId).update(testJson).then(async(response)=>{
-                await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.filter('Name eq ' + "'" + serviceData.ServiceId + "'").get()
+                await sp.web.rootFolder.folders.getByName(props.list.libraryName).folders.filter('Name eq' + "'" + serviceData.ServiceId + "'").get()
                 .then(async(results)=>{
                     for(let i=0;i<serviceData.DeleteFiles.length;i++){
                         await sp.web.getFileByServerRelativePath(serviceData.DeleteFiles[i].ServerRelativeUrl).delete()
@@ -333,6 +304,23 @@ const ServiceEditForm=(props:any)=>{
             }
         })
     }
+    const serviceStatusChange=async()=>{
+        await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+serviceData.ServiceId+"'").get().then((data)=>{
+            
+        if(data.every((value)=>value.Status==='Decline')){
+            parentStatusChange(serviceData.ServiceId,'Canceled')
+        } else if(data.every((value)=>value.Status==='Complete')){
+            parentStatusChange(serviceData.ServiceId,'Completed')
+        }}).catch((error)=>errorFunction(error,'parentStatus change'))
+    }
+    const parentStatusChange=async(ItemId:number,status:string)=>{
+        let json={
+            Status:status
+        }
+        await sp.web.lists.getByTitle('Services').items.getById(ItemId).update(json).then((data)=>{
+            
+        }).catch((error)=>errorFunction(error,'parent service update'))
+    }
     const addNewServiceData=async()=>{
         
         let Json={
@@ -340,16 +328,16 @@ const ServiceEditForm=(props:any)=>{
             ServiceDate:serviceData.ServiceDate ? serviceData.ServiceDate:new Date(),
             Notes:serviceData.Notes ? serviceData.Notes:'',
             Recurrence:serviceData.Recurrence ? serviceData.Recurrence:false,
-            RecurrenceType:serviceData.RecurrenceType ? serviceData.RecurrenceType:'',
-            StartDate:serviceData.StartDate ? serviceData.StartDate:new Date(''),
-            EndDate:serviceData.EndDate ? serviceData.EndDate:new Date(''),
+            RecurrenceType:serviceData.Recurrence ? serviceData.RecurrenceType ? serviceData.RecurrenceType:'':'',
+            StartDate:serviceData.Recurrence ? serviceData.StartDate ? serviceData.StartDate:new Date():new Date(),
+            EndDate:serviceData.Recurrence ? serviceData.EndDate ? serviceData.EndDate:new Date():new Date(),
             ProviderDetailsId:providerData.Id ? providerData.Id:null,
             ClientDetailsId:clientData.Id ? clientData.Id:null,
             ContrctDetailsId:contructorData.Id ? contructorData.Id:null,
             Status:"InProgress"
         }
         await sp.web.lists.getByTitle("Services").items.add(Json).then(async(item)=>{
-            if(serviceData.RecurrenceDates.length){
+            if(serviceData.Recurrence && serviceData.RecurrenceDates.length){
                 for(let i=0;i<serviceData.RecurrenceDates.length;i++){
                     let Json={
                         ServiceId:item.data.Id ? item.data.Id:null,

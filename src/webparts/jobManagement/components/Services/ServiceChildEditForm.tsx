@@ -102,7 +102,6 @@ const ServiceChildEditForm=(props:any)=>{
             getClientDropData()
         }).catch((error)=>errorFunction("get provider data",error))
     }
-
     const getClientDropData=async()=>{
         await sp.web.lists.getByTitle('Client').items.select('id,ClientName,Status').filter('Status eq ' + "'" + approve + "'").get().then((items)=>{
             if(items){
@@ -119,7 +118,6 @@ const ServiceChildEditForm=(props:any)=>{
         }).catch((error)=>errorFunction("get client data",error)
         )
     }
-
     const getContructorDropData=async()=>{
         await sp.web.lists.getByTitle('Contructor').items.select('id,ContrctName,Status').filter('Status eq ' + "'" + approve + "'").get().then((items)=>{
             if(items){
@@ -134,7 +132,6 @@ const ServiceChildEditForm=(props:any)=>{
             } 
         }).catch((error)=>errorFunction("get contructor data",error))
     }
-
     const getServicesdata=async()=>{
        
         await sp.web.lists.getByTitle('ServiceChild').items.select('ServiceName,ServiceDate,ServiceId,Notes,Status,ProviderDetailsId,ClientDetailsId,ContrctDetailsId').getById(props.formView.Id).get().then(async(result)=>{
@@ -213,12 +210,27 @@ const ServiceChildEditForm=(props:any)=>{
             }
 
             await sp.web.lists.getByTitle('ServiceChild').items.getById(props.formView.Id).update(testJson).then(async(response)=>{
+                await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+serviceData.ServiceId+"'").get().then((item)=>{
+                    if(item.every((value)=>value.Status==='Decline')){
+                        parentStatusChange(serviceData.ServiceId,'Canceled')
+                    } else if(item.every((value)=>value.Status==='Complete')){
+                        parentStatusChange(serviceData.ServiceId,'Completed')
+                    }
+                    
+                }).catch((error)=>errorFunction(error,'parentStatus change'))
                 props.setFormView({...props.formView,Id:serviceData.ServiceId})
                 props.setChange({...props.change,serviceChildDashBoard:true,serviceChildEdit:false,isSpinner:false})
             }).catch((error)=>errorFunction(error,'update service data'))
         }
     }
-    
+    const parentStatusChange=async(ItemId:number,status:string)=>{
+        let json={
+            Status:status
+        }
+        await sp.web.lists.getByTitle('Services').items.getById(ItemId).update(json).then((data)=>{
+            
+        }).catch((error)=>errorFunction(error,'parent service update'))
+    }
     const dateformat=(date:Date):string=>{
         return moment(date).format("YYYY/MM/DD")
     }
@@ -331,7 +343,7 @@ const ServiceChildEditForm=(props:any)=>{
                                 label="Select Contructor"
                                 options={contructorDropDown}
                                 selectedKey={contructorData.Id}
-                                disabled={viewAuthentication}
+                                disabled={viewAuthentication || (serviceData.Status != 'InProgress' && true)}
                                 onChange={(e,item)=>setServiceData({...serviceData,ContructorId:item.key})}
                             />
                         </div>
@@ -372,7 +384,7 @@ const ServiceChildEditForm=(props:any)=>{
                                 label='Select Date'
                                 formatDate={dateformat}
                                 value={serviceData.ServiceDate}
-                                disabled={viewAuthentication}
+                                disabled={true}
                                 onSelectDate={(e)=>setServiceData({...serviceData,ServiceDate:new Date(e)})}
                             />
                         </div>

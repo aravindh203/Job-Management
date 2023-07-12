@@ -109,7 +109,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     const [filter,setFilter] = useState<string>('All')
     const [filterData,setFilterData] = useState([]) 
     const [pageFilter,setPageFilter] = useState([])
-    const[search,setSearch] = useState<string>('')
+    const [search,setSearch] = useState<string>('')
     const [pagination,setPagination] = useState({
         currentPage:1,
         displayItems:5,
@@ -119,7 +119,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         
         let isEdit = false;
         
-        if(Statuses.indexOf(item.Status)>0){
+        if(item.Status=='Decline'){
             isEdit = true
         }
 
@@ -145,7 +145,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     })
                 })
                 setMData([...masterData])
-            setPageFilter([...masterData])
+                setPageFilter([...masterData])
             }else{
                 setMData([])
                 setPageFilter([])
@@ -162,8 +162,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             
             if(filter==="InProgress"){
                 return value.Status==='InProgress'
-            }
-            else if(filter==='BookConfirm'){
+            }else if(filter==='BookConfirm'){
                 return value.Status==='BookConfirm'
             }else if(filter==='Complete'){
                 return value.Status==='Complete'
@@ -270,9 +269,9 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     </div>
                 </div>
                 <div className={styles.searchBox}>
-                    <div>
+                    {/* <div>
                         <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)} disableAnimation/>
-                    </div>
+                    </div> */}
                     <div className={styles.backBtn} onClick={()=>{props.setChange({...props.change,servicesDashBoard:true,serviceChildDashBoard:false})}}>
                         <IconButton iconProps={{ iconName: 'NavigateBack' }} title="Add" ariaLabel="Add" />
                         <label>Go Back</label>
