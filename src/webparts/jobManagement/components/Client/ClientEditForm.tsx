@@ -60,15 +60,24 @@ const ClientEditForm = (props:any):JSX.Element =>{
     const handleError = (type:string,error:any):void =>{
         console.log(error)
         props.setChange({
+            providerDashBoard:false,
             provider:false,
             ProviderEdit:false,
+            clientDashBoard:false,
             client:false,
             clientEdit:false,
+            contructorDashBoard:false,
             contructor:false,
             conturctorEdit:false,
+            servicesDashBoard:false,
+            serviceChildDashBoard:false,
+            services:false,
+            servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
-            isSpinner:false
+            isSpinner:false,
         })
+        props.seterror(type)
     }
 
     const handleInputValue = (key:string,value:any):void =>{

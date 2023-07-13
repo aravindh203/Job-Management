@@ -57,7 +57,7 @@ const ProviderEditForm = (props:any):JSX.Element =>{
     })    
     
     const handleError = (type:string,error:any):void =>{
-        console.log(error)
+        console.log(error,type)
         props.setChange({
             providerDashBoard:false,
             provider:false,
@@ -69,12 +69,14 @@ const ProviderEditForm = (props:any):JSX.Element =>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })
-        props.seterror(error)
+        props.seterror(type)
     }
 
     const handleInputValue = (key:string,value:any):void =>{

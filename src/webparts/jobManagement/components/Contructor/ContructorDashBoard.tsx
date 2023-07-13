@@ -300,12 +300,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })
-        props.seterror(error)
+        props.seterror(name)
     }
 
     useEffect(()=>{

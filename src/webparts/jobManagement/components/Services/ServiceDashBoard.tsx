@@ -57,20 +57,12 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             text:'InProgress'
         },
         {
-            key:'BookConfirm',
-            text:'BookConfirm'
+            key:'Canceled',
+            text:'Canceled'
         },
         {
-            key:'Complete',
-            text:'Complete'
-        },
-        {
-            key:'Invoice',
-            text:'Invoice'
-        },
-        {
-            key:'InvoicePaid',
-            text:'InvoicePaid'
+            key:'Completed',
+            text:'Completed'
         }
     ]
     
@@ -138,7 +130,6 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }]
 
     const [MData,setMData] = useState<IData[]>([])
-    const [childMData,setChildMData]=useState([])
     const [filter,setFilter] = useState<string>('All')
     const [filterData,setFilterData] = useState([]) 
     const [pageFilter,setPageFilter] = useState([])
@@ -161,11 +152,6 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         }
     }
     
-    const findStatus=async()=>{              
-        await sp.web.lists.getByTitle('ServiceChild').items.select('*').orderBy('Modified',false).get().then((data)=>{
-            setChildMData(data)
-        }).catch((error)=>{errorFunction(error,'get child data')})
-    }
     const getServiceData=async()=>{
 
         await sp.web.lists.getByTitle(props.list.listName).items.select('*').orderBy('Modified',false).get().then((data)=>{
@@ -188,7 +174,6 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 setMData([])
                 setPageFilter([])
             }
-            findStatus()
         }).catch((error)=>{
             errorFunction(error,"get Services Data")
         })
@@ -201,14 +186,10 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             if(filter==="InProgress"){
                 return value.Status==='InProgress'
             }
-            else if(filter==='BookConfirm'){
-                return value.Status==='BookConfirm'
-            }else if(filter==='Complete'){
-                return value.Status==='Complete'
-            }else if(filter==='Invoice'){
-                return value.Status==='Invoice'
-            }else if(filter==='InvoicePaid'){
-                return value.Status==='InvoicePaid'
+            else if(filter==='Canceled'){
+                return value.Status==='Canceled'
+            }else if(filter==='Completed'){
+                return value.Status==='Completed'
             }
             else{
                 return value
@@ -301,7 +282,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
 
     const errorFunction=(error:any,name:string)=>{
-        console.log(name,error,);
+        console.log(name,error);
         props.setChange({
             providerDashBoard:false,
             provider:false,
@@ -313,12 +294,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })
-        props.seterror(error)
+        props.seterror(name)
     }
 
     useEffect(()=>{

@@ -48,6 +48,7 @@ const ServiceEditForm=(props:any)=>{
     const [providerDropDown,setProviderDropDown]=React.useState<IDropdownOption[]>([])
     const [clientrDropDown,setClientDropDown]=React.useState<IDropdownOption[]>([])
     const [contructorDropDown,setContructorDropDown]=React.useState<IDropdownOption[]>([])
+    const [error,setError]=React.useState('')
     const [serviceData,setServiceData]=React.useState({
         ServiceName:'',
         ServiceDate:new Date(),
@@ -58,8 +59,8 @@ const ServiceEditForm=(props:any)=>{
         DeleteFiles:[],
         Recurrence:false,
         RecurrenceType:'',
-        StartDate:new Date(''),
-        EndDate:new Date(''),
+        StartDate:new Date(),
+        EndDate:new Date(),
         RecurrenceDates:[],
         ProviderId:null,
         ClientId:null,
@@ -123,7 +124,6 @@ const ServiceEditForm=(props:any)=>{
         }).catch((error)=>errorFunction("get client data",error)
         )
     }
-
     const getContructorDropData=async()=>{
         await sp.web.lists.getByTitle('Contructor').items.select('id,ContrctName,Status').filter('Status eq ' + "'" + approve + "'").get().then((items)=>{
             if(items){
@@ -187,10 +187,10 @@ const ServiceEditForm=(props:any)=>{
                             StartDate:result.StartDate ? new Date(result.StartDate):new Date(),
                             EndDate:result.EndDate ? new Date(result.EndDate):new Date(),
                         })
-                    }).catch((error)=>errorFunction(error,'get files data'))
-                }).catch((error)=>errorFunction(error,'get folder data'))
+                    }).catch((error)=>errorFunction('get files data',error))
+                }).catch((error)=>errorFunction('get folder data',error))
             }
-        }).catch((error)=>errorFunction(error,'get service data'))
+        }).catch((error)=>errorFunction('get service data',error))
     }
     const getProviderData=async()=>{
         if(serviceData.ProviderId){
@@ -205,7 +205,7 @@ const ServiceEditForm=(props:any)=>{
                     Id:item.Id ? item.Id:null
                 })
                 getClientData()
-            }).catch((error)=>errorFunction(error,'get provider data'))
+            }).catch((error)=>errorFunction('get provider data',error))
         }
        
     }
@@ -221,7 +221,7 @@ const ServiceEditForm=(props:any)=>{
                     Id:item.Id ? item.Id:null
                 })
                 getContructorData()
-            }).catch((error)=>errorFunction(error,'get client data'))    
+            }).catch((error)=>errorFunction('get client data',error))    
         }
     }
     const getContructorData=async()=>{
@@ -235,25 +235,49 @@ const ServiceEditForm=(props:any)=>{
                     SecondAddress:item.SecondAddress ? item.SecondAddress:'',
                     Id:item.Id ? item.Id:null
                 })
-            }).catch((error)=>errorFunction(error,'get contructor data')) 
+            }).catch((error)=>errorFunction('get contructor data',error)) 
         }
+    }
+    const checkValidation=()=>{
+        let validation=false
+        if(serviceData.Recurrence){
+            if(!serviceData.RecurrenceType){
+                setError('Please Enter The Recurrence Type')
+            }
+            else if(!serviceData.StartDate){
+                setError('Please Enter The Start Date')
+            }
+            else if(!serviceData.EndDate){
+                setError('Please Enter The End Date')
+            }
+            else{
+                validation=true
+            }
+        }
+        else{
+            validation=true
+        }
+        return validation
     }
     const handleUpdate=async()=>{
         let updateResult=findInsertData()
-        props.setChange({...props.change,servicesEdit:false,isSpinner:true})
+        let validation=checkValidation()
        
         if(updateResult){
-            await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+serviceData.ServiceId+"'"+"and Status eq"+"'"+'InProgress'+"'").get().then(async(data)=>{
-                if(data.length){    
-                    for(let i=0;i<data.length;i++){
-                        let json={...data[i],Status:'Decline'}
-                        await sp.web.lists.getByTitle('ServiceChild').items.getById(data[i].Id).update(json).then((result)=>{
-                        }).catch((error)=>errorFunction(error,'update child cancel'))
-                    }
-                }     
-                serviceStatusChange()
-                addNewServiceData()           
-            }).catch((error)=>errorFunction(error, 'update get service child data'))
+            if(validation){
+                props.setChange({...props.change,servicesEdit:false,isSpinner:true})
+                await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+serviceData.ServiceId+"'"+"and Status eq"+"'"+'InProgress'+"'").get().then(async(data)=>{
+                    if(data.length){    
+                        for(let i=0;i<data.length;i++){
+                            let json={...data[i],Status:'Decline'}
+                            await sp.web.lists.getByTitle('ServiceChild').items.getById(data[i].Id).update(json).then((result)=>{
+                            }).catch((error)=>errorFunction('update child cancel',error))
+                        }
+                    }     
+                    serviceStatusChange()
+                    addNewServiceData()           
+                }).catch((error)=>errorFunction('update get service child data',error))
+            }
         }else if(!updateResult){ 
                        
             props.setChange({...props.change,servicesEdit:false,isSpinner:true})
@@ -281,10 +305,8 @@ const ServiceEditForm=(props:any)=>{
                     }
                     serviceChildUpdateData()
                     props.setChange({...props.change,servicesDashBoard:true,servicesEdit:false,isSpinner:false})
-                }).catch((error)=>errorFunction(error,'update folder'))
-            }).catch((error)=>errorFunction(error,'update service data'))
-        }else{
-            props.setChange({...props.change,servicesDashBoard:true,servicesEdit:false,isSpinner:false})
+                }).catch((error)=>errorFunction('update folder',error))
+            }).catch((error)=>errorFunction('update service data',error))
         }
     }
     const serviceChildUpdateData=async()=>{
@@ -300,7 +322,7 @@ const ServiceEditForm=(props:any)=>{
             for(let i=0;i<result.length;i++){
                 await sp.web.lists.getByTitle('ServiceChild').items.getById(result[i].Id).update(testJson).then((data)=>{
 
-                }).catch((error)=>errorFunction(error,'child service update'))
+                }).catch((error)=>errorFunction('child service update',error))
             }
         })
     }
@@ -311,7 +333,8 @@ const ServiceEditForm=(props:any)=>{
             parentStatusChange(serviceData.ServiceId,'Canceled')
         } else if(data.every((value)=>value.Status==='Complete')){
             parentStatusChange(serviceData.ServiceId,'Completed')
-        }}).catch((error)=>errorFunction(error,'parentStatus change'))
+        }
+        }).catch((error)=>errorFunction('parentStatus change',error))
     }
     const parentStatusChange=async(ItemId:number,status:string)=>{
         let json={
@@ -319,7 +342,7 @@ const ServiceEditForm=(props:any)=>{
         }
         await sp.web.lists.getByTitle('Services').items.getById(ItemId).update(json).then((data)=>{
             
-        }).catch((error)=>errorFunction(error,'parent service update'))
+        }).catch((error)=>errorFunction('parent service update',error))
     }
     const addNewServiceData=async()=>{
         
@@ -352,6 +375,20 @@ const ServiceEditForm=(props:any)=>{
                     await sp.web.lists.getByTitle("ServiceChild").items.add(Json).then((item)=>{
                     }).catch((error)=>errorFunction("add services  recurrence data",error))
                 }
+            }
+            else{
+                let Json={
+                    ServiceId:item.data.Id ? item.data.Id:null,
+                    ServiceName:serviceData.ServiceName ? serviceData.ServiceName:'',
+                    ServiceDate:serviceData.ServiceDate ? serviceData.ServiceDate:new Date(),
+                    Notes:serviceData.Notes ? serviceData.Notes:'',
+                    ProviderDetailsId:providerData.Id ? providerData.Id:null,
+                    ClientDetailsId:clientData.Id ? clientData.Id:null,
+                    ContrctDetailsId:contructorData.Id ? contructorData.Id:null,
+                    Status:"InProgress"
+                }
+                await sp.web.lists.getByTitle("ServiceChild").items.add(Json).then((item)=>{
+                }).catch((error)=>errorFunction("add services  recurrence data",error))
             }
             createFolder(item.data.Id) 
         }).catch((error)=>errorFunction("add services data",error))
@@ -438,8 +475,7 @@ const ServiceEditForm=(props:any)=>{
         }  
         setServiceData({...serviceData,RecurrenceDates:[...dates]})      
     }
-    
-    const errorFunction=(error,name)=>{
+    const errorFunction=(name,error)=>{
         console.log(error,name)  
         props.setChange({
             providerDashBoard:false,
@@ -452,12 +488,20 @@ const ServiceEditForm=(props:any)=>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })   
-        props.seterror(error)  
+        props.seterror(name)  
+    }
+    const getDatesFun=(startDate,endDate)=>{
+        let dates=[]
+        // while(startDate.toString()<=endDate.toString()){
+        //     console.log("dates",moment(startDate).set('date',moment(startDate).get('date')+1))
+        // }
     }
     React.useEffect(()=>{
         if(serviceData.RecurrenceType==='Daily'){
@@ -478,6 +522,7 @@ const ServiceEditForm=(props:any)=>{
     },[props.formView.authentication])
     React.useEffect(()=>{
         getProviderData()
+        getDatesFun(new Date(serviceData.StartDate),new Date(serviceData.EndDate))
     },[serviceData])
     React.useEffect(()=>{
         getProviderDropData()
@@ -599,7 +644,7 @@ const ServiceEditForm=(props:any)=>{
                                 label='Select Date'
                                 formatDate={dateformat}
                                 value={serviceData.ServiceDate}
-                                disabled={viewAuthentication}
+                                disabled={viewAuthentication || serviceData.Recurrence}
                                 onSelectDate={(e)=>setServiceData({...serviceData,ServiceDate:new Date(e)})}
                             />
                         </div>
@@ -636,39 +681,44 @@ const ServiceEditForm=(props:any)=>{
                         </div>
                         <div>
                             <label className={styles.labelTag}>Recurrence</label>
-                            <Checkbox checked={serviceData.Recurrence} label={serviceData.Recurrence ? 'Yes':'No'} disabled={viewAuthentication} onChange={(e,text)=>setServiceData({...serviceData,Recurrence:text})}/>
+                            <Checkbox checked={serviceData.Recurrence} label={serviceData.Recurrence ? 'Yes':'No'} disabled={viewAuthentication} onChange={(e,text)=>setServiceData({...serviceData,Recurrence:text,ServiceDate:new Date()})}/>
                         </div>
                     </div>
                     <div> 
+                        {serviceData.Recurrence &&
                         <div className={styles.serviceContent}>
                             <div className={styles.serviceBox}>
                                 <Dropdown 
                                     label='Select Recurrence Type'
                                     options={Recurrence}
                                     selectedKey={serviceData.Recurrence ? serviceData.RecurrenceType:''}
-                                    disabled={viewAuthentication ? viewAuthentication:!serviceData.Recurrence}
+                                    disabled={viewAuthentication}
                                     onChange={(e,item)=>setServiceData({...serviceData,RecurrenceType:item.text})}/>
                             </div>
                             <div className={styles.serviceBox}>
                                 <DatePicker 
                                     label='Select Start Date'
+                                    formatDate={dateformat}
                                     value={serviceData.StartDate}
-                                    disabled={viewAuthentication ? viewAuthentication:serviceData.Recurrence ? serviceData.RecurrenceType ? false:true:true}
+                                    disabled={viewAuthentication}
                                     onSelectDate={(e)=>setServiceData({...serviceData,StartDate:new Date(e)})}
                                 />
                             </div>
                             <div className={styles.serviceBox}>
                                 <DatePicker 
                                     label='Select End Date'
+                                    formatDate={dateformat}
                                     value={serviceData.EndDate}
-                                    disabled={viewAuthentication ? viewAuthentication:serviceData.Recurrence ? serviceData.RecurrenceType ? false:true:true}
+                                    disabled={viewAuthentication}
                                     onSelectDate={(e)=>setServiceData({...serviceData,EndDate:new Date(e)})}
                                 />
                             </div>
                         </div>
+                        }
                     </div>
                 </div>  
             </div>
+            {error}
             {!viewAuthentication &&
             <div className={styles.serviceBtn}>
                 <DefaultButton text='Update' onClick={()=>handleUpdate()}/>

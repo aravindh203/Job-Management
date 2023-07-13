@@ -58,6 +58,10 @@ const DashBoardComponent=(props:any):JSX.Element=>{
         {
             key:'InvoicePaid',
             text:'InvoicePaid'
+        },
+        {
+            key:'Decline',
+            text:'Decline'
         }
     ]
     
@@ -109,7 +113,6 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     const [filter,setFilter] = useState<string>('All')
     const [filterData,setFilterData] = useState([]) 
     const [pageFilter,setPageFilter] = useState([])
-    const [search,setSearch] = useState<string>('')
     const [pagination,setPagination] = useState({
         currentPage:1,
         displayItems:5,
@@ -170,19 +173,16 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                 return value.Status==='Invoice'
             }else if(filter==='InvoicePaid'){
                 return value.Status==='InvoicePaid'
+            }else if(filter==='Decline'){
+                return value.Status==='Decline'
             }
             else{
                 return value
             }
         })  
-        let searchdata=[]
-        if(filterData1.length){            
-            searchdata=[...filterData1].filter((value)=>{
-                return value.ServiceName.toLowerCase().startsWith(search.trimStart())
-            })
-        }
-        setPageFilter([...searchdata])
-        setFilterData([...searchdata]) 
+        
+        setPageFilter([...filterData1])
+        setFilterData([...filterData1]) 
         
     }
 
@@ -234,18 +234,19 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
             serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })
-        props.seterror(error)
+        props.seterror(name)
     }
 
     useEffect(()=>{
         dropFilter()
-    },[filter,search])
+    },[filter])
 
     useEffect(()=>{
         getPagination()
@@ -269,9 +270,6 @@ const DashBoardComponent=(props:any):JSX.Element=>{
                     </div>
                 </div>
                 <div className={styles.searchBox}>
-                    {/* <div>
-                        <SearchBox placeholder="Search" onChange={(e)=>setSearch(e.target.value)} disableAnimation/>
-                    </div> */}
                     <div className={styles.backBtn} onClick={()=>{props.setChange({...props.change,servicesDashBoard:true,serviceChildDashBoard:false})}}>
                         <IconButton iconProps={{ iconName: 'NavigateBack' }} title="Add" ariaLabel="Add" />
                         <label>Go Back</label>

@@ -78,7 +78,7 @@ const ClientForm = (props:any):JSX.Element =>{
                 phoneNum.push(mobileNumber)
            })
            setPhoneNum([...phoneNum])
-        }).catch((error)=>errorFunction(error,"getPhonoNo"))
+        }).catch((error)=>errorFunction("getPhonoNo",error))
 
     }
 
@@ -184,15 +184,24 @@ const ClientForm = (props:any):JSX.Element =>{
     const errorFunction=(name,error)=>{
         console.log(error,name);
         props.setChange({
+            providerDashBoard:false,
             provider:false,
             ProviderEdit:false,
+            clientDashBoard:false,
             client:false,
             clientEdit:false,
+            contructorDashBoard:false,
             contructor:false,
             conturctorEdit:false,
+            servicesDashBoard:false,
+            serviceChildDashBoard:false,
+            services:false,
+            servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
-            isSpinner:false
+            isSpinner:false,
         })
+        props.seterror(name)
     }
 
     useEffect(()=>{

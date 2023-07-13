@@ -77,7 +77,7 @@ const ContructorForm = (props:any):JSX.Element =>{
                 phoneNum.push(mobileNumber)
            })
            setPhoneNum([...phoneNum])
-        }).catch((error)=>errorFunction(error,"getPhonoNo"))
+        }).catch((error)=>errorFunction("getPhonoNo",error))
 
     }
 
@@ -196,12 +196,14 @@ const ContructorForm = (props:any):JSX.Element =>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })
-        props.seterror(error)
+        props.seterror(name)
     }
 
     useEffect(()=>{

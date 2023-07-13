@@ -79,7 +79,7 @@ const ProviderAddForm = (props:any):JSX.Element =>{
            })
 
            setPhoneNum([...phoneNum])
-        }).catch((error)=>errorFunction(error,"getPhonoNo"))
+        }).catch((error)=>errorFunction("getPhonoNo",error))
 
     }
     const validation = (btnVal:string):boolean =>{
@@ -197,12 +197,14 @@ const ProviderAddForm = (props:any):JSX.Element =>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })
-        props.seterror(error)
+        props.seterror(name)
     }
 
     useEffect(()=>{

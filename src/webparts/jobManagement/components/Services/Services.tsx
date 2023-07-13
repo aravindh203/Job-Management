@@ -52,13 +52,13 @@ const Services = (props:any):JSX.Element=>{
     const [error,setError]=React.useState('')
     const [Service,setService]=React.useState({
         serviceName:'',
-        serviceDate:null,
+        serviceDate:new Date(),
         serviceNotes:'',
         files:[],
         Recurrence:false,
         RecurrenceType:'',
-        StartDate:'',
-        EndDate:'',
+        StartDate:new Date(),
+        EndDate:new Date(),
         RecurrenceDates:[]
     })    
     const [providerData,setProviderData]=React.useState<IData>({
@@ -224,8 +224,8 @@ const Services = (props:any):JSX.Element=>{
                 Notes:Service.serviceNotes ? Service.serviceNotes:'',
                 Recurrence:Service.Recurrence ? Service.Recurrence:false,
                 RecurrenceType:Service.RecurrenceType ? Service.RecurrenceType:'',
-                StartDate:Service.StartDate ? Service.StartDate:new Date(''),
-                EndDate:Service.EndDate ? Service.EndDate:new Date(''),
+                StartDate:Service.StartDate ? Service.StartDate:new Date(),
+                EndDate:Service.EndDate ? Service.EndDate:new Date(),
                 ProviderDetailsId:providerData.Id ? providerData.Id:null,
                 ClientDetailsId:clientData.Id ? clientData.Id:null,
                 ContrctDetailsId:contructorData.Id ? contructorData.Id:null,
@@ -266,6 +266,14 @@ const Services = (props:any):JSX.Element=>{
             }).catch((error)=>errorFunction("add services data",error))
         }
     }
+    const handleRecurrence=(text)=>{
+        setService({...Service,
+            Recurrence:text,
+            serviceDate:new Date(),
+            StartDate:new Date(),
+            EndDate:new Date()
+        })
+    }
     const fileUpload=(data)=>{
         let filesData=[]
         for(let i=0;i<data.length;i++){
@@ -293,7 +301,7 @@ const Services = (props:any):JSX.Element=>{
             }).catch((error)=>errorFunction("folder error",error))
         }
     }
-    const errorFunction=(error,name)=>{
+    const errorFunction=(name,error)=>{
         console.log(error,name);  
         props.setChange({
             providerDashBoard:false,
@@ -306,14 +314,18 @@ const Services = (props:any):JSX.Element=>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })  
-        props.seterror(error)    
+        props.seterror(name)    
     }
-    
+    const dateFormat=(date:Date):string=>{
+        return moment(date).format('YYYY/MM/DD')
+    }
     const getBetweenDates=(startDate, endDate)=> {
                
         let dates = [];
@@ -360,7 +372,7 @@ const Services = (props:any):JSX.Element=>{
             getYearDates(new Date(Service.StartDate),new Date(Service.EndDate))
         }
         
-    },[Service.StartDate,Service.EndDate])
+    },[Service.RecurrenceType,Service.StartDate,Service.EndDate])
     React.useEffect(()=>{
          getMasterData(selectDrop)   
     },[selectDrop])
@@ -473,8 +485,11 @@ const Services = (props:any):JSX.Element=>{
                         </div>
                         <div className={styles.serviceBox}>
                             <DatePicker 
-                                label='Select Date'
-                                onSelectDate={(e)=>setService({...Service,serviceDate:moment(e).format('YYYY/MM/DD')})}
+                                label='Select Service Date'
+                                formatDate={dateFormat}
+                                value={Service.serviceDate}
+                                disabled={Service.Recurrence}
+                                onSelectDate={(e)=>setService({...Service,serviceDate:new Date(e)})}
                             />
                         </div>
                         <div>
@@ -498,10 +513,11 @@ const Services = (props:any):JSX.Element=>{
                         </div>
                         <div>
                             <label className={styles.labelTag}>Recurrence</label>
-                            <Checkbox checked={Service.Recurrence} label={Service.Recurrence ? 'Yes':'No'} onChange={(e,text)=>setService({...Service,Recurrence:text})}/>
+                            <Checkbox checked={Service.Recurrence} label={Service.Recurrence ? 'Yes':'No'} onChange={(e,text)=>handleRecurrence(text)}/>
                         </div>
                     </div>
                     <div>
+                        {Service.Recurrence &&
                         <div className={styles.serviceContent}>
                             <div className={styles.serviceBox}>
                                 <Dropdown 
@@ -513,18 +529,23 @@ const Services = (props:any):JSX.Element=>{
                             <div className={styles.serviceBox}>
                                 <DatePicker 
                                     label='Select Start Date'
-                                    disabled={Service.RecurrenceType ? false:true}
-                                    onSelectDate={(e)=>setService({...Service,StartDate:moment(e).format('YYYY-MM-DD')})}
+                                    formatDate={dateFormat}
+                                    value={Service.StartDate}
+                                    disabled={!Service.Recurrence}
+                                    onSelectDate={(e)=>setService({...Service,StartDate:new Date(e)})}
                                 />
                             </div>
                             <div className={styles.serviceBox}>
                                 <DatePicker 
                                     label='Select End Date'
-                                    disabled={Service.RecurrenceType ? false:true}
-                                    onSelectDate={(e)=>setService({...Service,EndDate:moment(e).format('YYYY-MM-DD')})}
+                                    formatDate={dateFormat}
+                                    value={Service.EndDate}
+                                    disabled={!Service.Recurrence}
+                                    onSelectDate={(e)=>setService({...Service,EndDate:new Date(e)})}
                                 />
                             </div>
                         </div>
+                        }
                     </div>
                 </div>   
             </div>
