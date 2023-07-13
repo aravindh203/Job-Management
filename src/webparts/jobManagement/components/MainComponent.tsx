@@ -55,7 +55,6 @@ const MainCoimponent=(props:any)=>{
         }
     }
 
-
     const [pageRender,setPageRender] = useState<string>('Provider')       
     const [admin,setAdmin ] =useState<boolean>(false);
     const [manager,setManager]=useState<boolean>(false)
@@ -89,7 +88,6 @@ const MainCoimponent=(props:any)=>{
         isSpinner:false,
     })
     
-
     const handleError = (type:string,error:any):void =>{
         console.log(type,error)
         setComponentChange({

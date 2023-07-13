@@ -301,7 +301,7 @@ const DashBoardComponent=(props:any):JSX.Element=>{
     }
 
     const errorFunction=(error:any,name:string)=>{
-        console.log(name,error,);
+        console.log(name,error);
         props.setChange({
             providerDashBoard:false,
             provider:false,
@@ -313,12 +313,14 @@ const DashBoardComponent=(props:any):JSX.Element=>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })
-        props.seterror(error)
+        props.seterror(name)
     }
 
     useEffect(()=>{

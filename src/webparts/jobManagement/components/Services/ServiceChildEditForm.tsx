@@ -100,7 +100,7 @@ const ServiceChildEditForm=(props:any)=>{
                 setProviderDropDown(ProviderDrop)
             }
             getClientDropData()
-        }).catch((error)=>errorFunction("get provider data",error))
+        }).catch((error)=>errorFunction(error,"get provider data"))
     }
     const getClientDropData=async()=>{
         await sp.web.lists.getByTitle('Client').items.select('id,ClientName,Status').filter('Status eq ' + "'" + approve + "'").get().then((items)=>{
@@ -115,7 +115,7 @@ const ServiceChildEditForm=(props:any)=>{
                 setClientDropDown(ClientDrop)
             }
             getContructorDropData()
-        }).catch((error)=>errorFunction("get client data",error)
+        }).catch((error)=>errorFunction(error,"get client data")
         )
     }
     const getContructorDropData=async()=>{
@@ -130,7 +130,7 @@ const ServiceChildEditForm=(props:any)=>{
                 })
                 setContructorDropDown(ContructorDrop)
             } 
-        }).catch((error)=>errorFunction("get contructor data",error))
+        }).catch((error)=>errorFunction(error,"get contructor data"))
     }
     const getServicesdata=async()=>{
        
@@ -247,12 +247,14 @@ const ServiceChildEditForm=(props:any)=>{
             contructor:false,
             conturctorEdit:false,
             servicesDashBoard:false,
+            serviceChildDashBoard:false,
             services:false,
             servicesEdit:false,
+            serviceChildEdit:false,
             isError:true,
             isSpinner:false,
         })   
-        props.seterror(error)  
+        props.seterror(name)  
     }
 
     React.useEffect(()=>{
