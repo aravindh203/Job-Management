@@ -15,7 +15,6 @@ interface IData{
 const ServiceEditForm=(props:any)=>{
     let approve:string='Approve'
     let viewAuthentication=props.formView.status=='view' ? true:false
-   
     const services:IDropdownOption[]=[{
         key:'House Cleaning',
         text:"House Cleaning"
@@ -49,6 +48,7 @@ const ServiceEditForm=(props:any)=>{
     const [clientrDropDown,setClientDropDown]=React.useState<IDropdownOption[]>([])
     const [contructorDropDown,setContructorDropDown]=React.useState<IDropdownOption[]>([])
     const [error,setError]=React.useState('')
+    const [statusViewFlag,setStatusViewFlag]=React.useState(false)
     const [serviceData,setServiceData]=React.useState({
         ServiceName:'',
         ServiceDate:new Date(),
@@ -142,7 +142,7 @@ const ServiceEditForm=(props:any)=>{
         
         let update
         
-        if(newServiceData.RecurrenceType != serviceData.RecurrenceType || newServiceData.StartDate.toString() != serviceData.StartDate.toString() || newServiceData.EndDate.toString() != serviceData.EndDate.toString() || newServiceData.Recurrence != serviceData.Recurrence){
+        if(newServiceData.RecurrenceType != serviceData.RecurrenceType || newServiceData.StartDate.toDateString() != serviceData.StartDate.toDateString() || newServiceData.EndDate.toDateString() != serviceData.EndDate.toDateString() || newServiceData.Recurrence != serviceData.Recurrence){
             update=true
         }
         else if(newServiceData.ServiceDate !== serviceData.ServiceDate || newServiceData.Notes !== serviceData.Notes || serviceData.DeleteFiles.length > 0 || serviceData.UpdateFiles.length > 0){
@@ -189,6 +189,7 @@ const ServiceEditForm=(props:any)=>{
                         })
                     }).catch((error)=>errorFunction('get files data',error))
                 }).catch((error)=>errorFunction('get folder data',error))
+                serviceStatusChange(result.Id)
             }
         }).catch((error)=>errorFunction('get service data',error))
     }
@@ -274,7 +275,7 @@ const ServiceEditForm=(props:any)=>{
                             }).catch((error)=>errorFunction('update child cancel',error))
                         }
                     }     
-                    serviceStatusChange()
+                    serviceStatusChange(serviceData.ServiceId)
                     addNewServiceData()           
                 }).catch((error)=>errorFunction('update get service child data',error))
             }
@@ -326,23 +327,31 @@ const ServiceEditForm=(props:any)=>{
             }
         })
     }
-    const serviceStatusChange=async()=>{
-        await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+serviceData.ServiceId+"'").get().then((data)=>{
+    const serviceStatusChange=async(itemId:number)=>{
+        await sp.web.lists.getByTitle('ServiceChild').items.select('*').filter("ServiceId eq"+"'"+itemId+"'").get().then((data)=>{
             
-        if(data.every((value)=>value.Status==='Decline')){
-            parentStatusChange(serviceData.ServiceId,'Canceled')
-        } else if(data.every((value)=>value.Status==='Complete')){
-            parentStatusChange(serviceData.ServiceId,'Completed')
-        }
+            if(data.every((value)=>value.Status==='Decline')){
+                parentStatusChange(itemId,'Canceled')
+            } else if(data.every((value)=>value.Status==='Complete')){
+                parentStatusChange(itemId,'Completed')
+            }
+
+            if(data.every((value)=>value.Status != 'InProgress')){
+                setStatusViewFlag(true)                
+            }
         }).catch((error)=>errorFunction('parentStatus change',error))
     }
+    
     const parentStatusChange=async(ItemId:number,status:string)=>{
+        
         let json={
             Status:status
         }
-        await sp.web.lists.getByTitle('Services').items.getById(ItemId).update(json).then((data)=>{
-            
-        }).catch((error)=>errorFunction('parent service update',error))
+        if(ItemId){
+            await sp.web.lists.getByTitle('Services').items.getById(ItemId).update(json).then((data)=>{
+                
+            }).catch((error)=>errorFunction('parent service update',error))
+        }
     }
     const addNewServiceData=async()=>{
         
@@ -351,9 +360,9 @@ const ServiceEditForm=(props:any)=>{
             ServiceDate:serviceData.ServiceDate ? serviceData.ServiceDate:new Date(),
             Notes:serviceData.Notes ? serviceData.Notes:'',
             Recurrence:serviceData.Recurrence ? serviceData.Recurrence:false,
-            RecurrenceType:serviceData.Recurrence ? serviceData.RecurrenceType ? serviceData.RecurrenceType:'':'',
-            StartDate:serviceData.Recurrence ? serviceData.StartDate ? serviceData.StartDate:new Date():new Date(),
-            EndDate:serviceData.Recurrence ? serviceData.EndDate ? serviceData.EndDate:new Date():new Date(),
+            RecurrenceType:serviceData.RecurrenceType ? serviceData.RecurrenceType:'',
+            StartDate:serviceData.StartDate ? serviceData.StartDate:new Date(),
+            EndDate:serviceData.EndDate ? serviceData.EndDate:new Date(),
             ProviderDetailsId:providerData.Id ? providerData.Id:null,
             ClientDetailsId:clientData.Id ? clientData.Id:null,
             ContrctDetailsId:contructorData.Id ? contructorData.Id:null,
@@ -412,6 +421,15 @@ const ServiceEditForm=(props:any)=>{
                 props.setChange({...props.change,servicesEdit:false,servicesDashBoard:true,isSpinner:false})
             }).catch((error)=>errorFunction("folder error",error))
         }
+    }
+    const handleRecurrence=(text)=>{
+        setServiceData({...serviceData,
+            Recurrence:text,
+            ServiceDate:new Date(),
+            StartDate:new Date(),
+            EndDate:new Date(),
+            RecurrenceType:''
+        })
     }
     const fileUpload=(event)=>{
        
@@ -644,20 +662,20 @@ const ServiceEditForm=(props:any)=>{
                                 label='Select Date'
                                 formatDate={dateformat}
                                 value={serviceData.ServiceDate}
-                                disabled={viewAuthentication || serviceData.Recurrence}
+                                disabled={viewAuthentication || serviceData.Recurrence || statusViewFlag}
                                 onSelectDate={(e)=>setServiceData({...serviceData,ServiceDate:new Date(e)})}
                             />
                         </div>
                         <div>
                             <label className={styles.labelTag}>Files</label>
-                            <input type="file" name='file' multiple onChange={(e)=>{fileUpload(e)}} disabled={viewAuthentication}/>
+                            <input type="file" name='file' multiple onChange={(e)=>{fileUpload(e)}} disabled={viewAuthentication || statusViewFlag}/>
                             <div>
                                 {
                                     serviceData.Files.map((value,index)=>{
                                         return(
                                             <div key={index}>
                                                 <a href='#'>{value.Name}</a>
-                                                <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(value,index)} disabled={viewAuthentication}/>
+                                                <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleFileClose(value,index)} disabled={viewAuthentication || statusViewFlag}/>
                                             </div>
                                         )
                                     })
@@ -669,7 +687,7 @@ const ServiceEditForm=(props:any)=>{
                                         return(
                                             <div key={index}>
                                                 <a href='#'>{value.name}</a>
-                                                <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleUpdateFileClose(index)} disabled={viewAuthentication}/>
+                                                <IconButton iconProps={{ iconName: 'Cancel' }} onClick={()=>handleUpdateFileClose(index)} disabled={viewAuthentication || statusViewFlag}/>
                                             </div>
                                         )
                                     })
@@ -677,11 +695,11 @@ const ServiceEditForm=(props:any)=>{
                             </div>
                         </div>
                         <div className={styles.serviceBox}>
-                            <TextField label='Notes' value={serviceData.Notes} disabled={viewAuthentication} onChange={(e,text)=>setServiceData({...serviceData,Notes:text})} multiline style={{resize:'none'}}/>
+                            <TextField label='Notes' value={serviceData.Notes} disabled={viewAuthentication || statusViewFlag} onChange={(e,text)=>setServiceData({...serviceData,Notes:text})} multiline style={{resize:'none'}}/>
                         </div>
                         <div>
                             <label className={styles.labelTag}>Recurrence</label>
-                            <Checkbox checked={serviceData.Recurrence} label={serviceData.Recurrence ? 'Yes':'No'} disabled={viewAuthentication} onChange={(e,text)=>setServiceData({...serviceData,Recurrence:text,ServiceDate:new Date()})}/>
+                            <Checkbox checked={serviceData.Recurrence} label={serviceData.Recurrence ? 'Yes':'No'} disabled={viewAuthentication || statusViewFlag} onChange={(e,text)=>handleRecurrence(text)}/>
                         </div>
                     </div>
                     <div> 
@@ -692,7 +710,7 @@ const ServiceEditForm=(props:any)=>{
                                     label='Select Recurrence Type'
                                     options={Recurrence}
                                     selectedKey={serviceData.Recurrence ? serviceData.RecurrenceType:''}
-                                    disabled={viewAuthentication}
+                                    disabled={viewAuthentication || statusViewFlag}
                                     onChange={(e,item)=>setServiceData({...serviceData,RecurrenceType:item.text})}/>
                             </div>
                             <div className={styles.serviceBox}>
@@ -700,7 +718,7 @@ const ServiceEditForm=(props:any)=>{
                                     label='Select Start Date'
                                     formatDate={dateformat}
                                     value={serviceData.StartDate}
-                                    disabled={viewAuthentication}
+                                    disabled={viewAuthentication || statusViewFlag}
                                     onSelectDate={(e)=>setServiceData({...serviceData,StartDate:new Date(e)})}
                                 />
                             </div>
@@ -709,7 +727,7 @@ const ServiceEditForm=(props:any)=>{
                                     label='Select End Date'
                                     formatDate={dateformat}
                                     value={serviceData.EndDate}
-                                    disabled={viewAuthentication}
+                                    disabled={viewAuthentication || statusViewFlag}
                                     onSelectDate={(e)=>setServiceData({...serviceData,EndDate:new Date(e)})}
                                 />
                             </div>
