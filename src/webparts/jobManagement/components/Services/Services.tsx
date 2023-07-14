@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState,useEffect } from 'react';
 import { sp} from "@pnp/sp/presets/all";
 import { Checkbox, DatePicker, DefaultButton, Dropdown, IDropdownOption, IconButton, TextField } from '@fluentui/react';
 import * as moment from "moment"
@@ -13,11 +14,12 @@ interface IData{
 }
 const Services = (props:any):JSX.Element=>{
     let approve:string='Approve'
-    const select=[{
+    
+    const services:IDropdownOption[]=
+    [{
         key:'Select',
-        text:'Select'
-    }]
-    const services:IDropdownOption[]=[{
+        text:"Select"
+    },{
         key:'House Cleaning',
         text:"House Cleaning"
     },{
@@ -51,7 +53,7 @@ const Services = (props:any):JSX.Element=>{
     const [contructorDropDown,setContructorDropDown]=React.useState<IDropdownOption[]>([])
     const [error,setError]=React.useState('')
     const [Service,setService]=React.useState({
-        serviceName:'',
+        serviceName:'Select',
         serviceDate:new Date(),
         serviceNotes:'',
         files:[],
@@ -89,6 +91,7 @@ const Services = (props:any):JSX.Element=>{
         listName:'',
         items:null
     })
+    console.log('provider',providerDropDown);
     
     const getProviderData=async()=>{
         await sp.web.lists.getByTitle('ProviderList').items.select('id,ProviderName,Status').filter('Status eq ' + "'" + approve + "'").get().then((items)=>{
@@ -155,8 +158,8 @@ const Services = (props:any):JSX.Element=>{
             fAddress='ContactAddress'
             sAddresss='SecondAddress'
         }
-        if(value.items['key']){
-            await sp.web.lists.getByTitle(value.listName).items.select('*').getById(value.items['key']).get().then((data)=>{
+        if(value.items.key){
+            await sp.web.lists.getByTitle(value.listName).items.select('*').getById(value.items.key).get().then((data)=>{
             
                 let Data:IData={
                     Name:data[findPerson] ? data[findPerson]:'',
@@ -271,7 +274,8 @@ const Services = (props:any):JSX.Element=>{
             Recurrence:text,
             serviceDate:new Date(),
             StartDate:new Date(),
-            EndDate:new Date()
+            EndDate:new Date(),
+            RecurrenceType:''
         })
     }
     const fileUpload=(data)=>{
@@ -480,6 +484,7 @@ const Services = (props:any):JSX.Element=>{
                             <Dropdown
                                 label='Select Services'
                                 options={services}
+                                defaultSelectedKey={Service.serviceName}
                                 onChange={(e,item)=>setService({...Service,serviceName:item.text})}
                             />
                         </div>
